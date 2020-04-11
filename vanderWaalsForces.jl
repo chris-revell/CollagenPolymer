@@ -12,8 +12,8 @@ include("lennardJones.jl")
 using LinearAlgebra
 
 function vanderWaalsForces!(pos,v,Nmonomers,epsilon,re)
-    for ii=1:Nmonomers
-        for jj=1:Nmonomers
+    for ii=1:(2*Nmonomers)
+        for jj=1:(2*Nmonomers)
             if ii!=jj
                 F = pos[jj,:] - pos[ii,:]
                 LennardJones.lennardJones!(F,epsilon,re)

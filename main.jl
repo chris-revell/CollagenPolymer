@@ -10,6 +10,7 @@
 include("./calculateNoise.jl")
 #include("outputData.jl")
 #include("readParameters.jl")
+include("./intraMonomerForces.jl")
 include("./vanderWaalsForces.jl")
 
 using Distributions
@@ -17,15 +18,17 @@ using DelimitedFiles
 using Printf
 
 Nmonomers      = 10
-tmax           = 10000.0
+tmax           = 1000.0
 outputInterval = 100.0
-dt             = 0.001
+dt             = 0.01
 zetaMag        = 1.0
+k              = 1.0
 epsilon        = 1.0
 re             = 0.1
-time           = 0.0
-pos            = rand(Uniform(-1.0,1.0),Nmonomers,3)
-v              = zeros(Nmonomers,3)
+t              = 0.0
+l              = 0.2
+pos            = rand(Uniform(-1.0,1.0),2*Nmonomers,3)
+v              = zeros(2*Nmonomers,3)
 
 open("output/conditions.txt","w") do conditionsfile
     println(conditionsfile,"Nmonomers      ",Nmonomers      )
@@ -39,19 +42,21 @@ end
 
 outfile = open("output/output.txt","w")
 
-while time<tmax
+while t<tmax
 
-    if (time %outputInterval)<dt
+    if (t%outputInterval)<dt
         writedlm(outfile,pos,", ")
-        Printf.@printf("Simulating: %f/%f\n",time,tmax)
+        Printf.@printf("Simulating: %f/%f\n",t,tmax)
     end
+
+    IntraMonomerForces.intraMonomerForces!(pos,v,Nmonomers,k,l)
 
     VanderWaalsForces.vanderWaalsForces!(pos,v,Nmonomers,epsilon,re)
 
     CalculateNoise.calculateNoise!(v,zetaMag,Nmonomers)
 
     global pos .= pos .+ v.*dt/100
-    global time += dt
+    global t += dt
     global v .= 0
 
 end

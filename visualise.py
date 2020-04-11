@@ -5,7 +5,7 @@ from sys import argv
 
 data           = np.genfromtxt("output/output.txt",delimiter=", ")
 conditions     = np.genfromtxt("output/conditions.txt")
-Nmonomers      = int(conditions[0,1])
+Nmonomers      = 2*int(conditions[0,1])
 tmax           = conditions[1,1]
 outputInterval = conditions[2,1]
 
