@@ -5,20 +5,24 @@
 #  Created by Christopher Revell on 30/03/2020.
 #
 #
-
+__precompile__()
 module VanderWaalsForces
 
 include("lennardJones.jl")
 using LinearAlgebra
+using StaticArrays
 
-function vanderWaalsForces!(pos,v,Nmonomers,epsilon,re)
-    for ii=1:(2*Nmonomers)
-        for jj=1:(2*Nmonomers)
+function vanderWaalsForces!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,epsilon::Float64,re::Float64)
+
+    F = MArray{Tuple{3},Float64,1,3}
+
+    @inbounds for ii=1:Ndomains*Nmonomers
+        @inbounds for jj=1:Ndomains*Nmonomers
             if ii!=jj
-                F = pos[jj,:] - pos[ii,:]
+                F = pos[jj,:] .- pos[ii,:]
                 LennardJones.lennardJones!(F,epsilon,re)
-                v[ii,:] = v[ii,:] - F
-                v[jj,:] = v[jj,:] + F
+                v[ii,:] .-= F
+                v[jj,:] .+= F
             end
         end
     end

@@ -6,19 +6,17 @@
 #
 #
 
-#include "outputData.hpp"
-#include "monomer.hpp"
-#include <armadillo>
-#include <vector>
-#include <iostream>
-#include <fstream>
+module OutputData
 
-function outputData!(const vector<monomer>& Monomers,ofstream& povrayFile,const int& Nmonomers,const float& t,const float& tmax){
+function outputData!(pos,povrayFile,Nmonomers,t,tmax)
   for (int jj=0 jj<Nmonomers jj++){
     for (int ii=0 ii<Monomers[jj].Ndomains*3 ii++){
       povrayFile << Monomers[jj].pos(ii,0) << ", " << Monomers[jj].pos(ii,1) << ", " << Monomers[jj].pos(ii,2) << ", " << Monomers[jj].domainLength/2.0 << ", " << t << endl
     }
   }
-  system("clear")
   cout << "Simulating: " << t << "/" << tmax << endl
+  if (t%outputInterval)<dt
+      writedlm(outfile,pos,", ")
+      Printf.@printf("Simulating: %f/%f\n",t,tmax)
+  end
 }
