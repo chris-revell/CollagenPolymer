@@ -15,7 +15,6 @@ using StaticArrays
 
 function calculateNoise!(v::MMatrix,Nmonomers,Ndomains,zetaMag)
 
-    Random.seed!()
     # Loop over all monomers
     @inbounds for ii=1:Nmonomers*Ndomains
         ranTheta = 2.0*pi*rand(Uniform(0.0,1.0))

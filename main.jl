@@ -18,8 +18,12 @@ using DelimitedFiles
 using Printf
 using Dates
 using StaticArrays
-#using Profile
-#using ProfileView
+
+using .IntraMonomerForces
+using .BendingModulus
+using .VanderWaalsForces
+using .CalculateNoise
+using .UpdateSystem
 
 const Nmonomers      = 5
 const Ndomains       = 5
@@ -65,15 +69,15 @@ end
             Printf.@printf("Simulating: %f/%f\n",t,tmax)
         end
 
-        IntraMonomerForces.intraMonomerForces!(pos,v,Nmonomers,Ndomains,k,l)
+        intraMonomerForces!(pos,v,Nmonomers,Ndomains,k,l)
 
-        BendingModulus.bendingModulus!(pos,v,Nmonomers,Ndomains,Ebend)
+        bendingModulus!(pos,v,Nmonomers,Ndomains,Ebend)
 
-        VanderWaalsForces.vanderWaalsForces!(pos,v,Nmonomers,Ndomains,epsilon,re)
+        vanderWaalsForces!(pos,v,Nmonomers,Ndomains,epsilon,re)
 
-        CalculateNoise.calculateNoise!(v,Nmonomers,Ndomains,zetaMag)
+        calculateNoise!(v,Nmonomers,Ndomains,zetaMag)
 
-        t = UpdateSystem.updateSystem!(pos,v,Nmonomers,Ndomains,t,dt)
+        t = updateSystem!(pos,v,Nmonomers,Ndomains,t,dt)
 
     end
 
@@ -81,7 +85,3 @@ end
 end
 
 runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,zetaMag,k,Ebend,epsilon,re,l,pos,v,foldername)
-
-#@profile runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,zetaMag,k,Ebend,epsilon,re,l,pos,v,foldername)
-#ProfileView.view()
-#Profile.print()
