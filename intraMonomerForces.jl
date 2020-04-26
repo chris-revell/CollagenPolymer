@@ -11,7 +11,7 @@ module IntraMonomerForces
 using LinearAlgebra
 using StaticArrays
 
-function intraMonomerForces!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,k::Float64,l::Float64)
+@inline function intraMonomerforces!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,k::Float64,l::Float64,dx::Array{Float64,1})
 	# Tension forces between monomer domains
 	@inbounds for ii=1:Nmonomers
 		@inbounds for jj=1:Ndomains-1
@@ -24,6 +24,6 @@ function intraMonomerForces!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::
 	end
 end
 
-export intraMonomerForces!
+export intraMonomerforces!
 
 end

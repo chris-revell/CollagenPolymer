@@ -6,15 +6,14 @@
 #
 #
 __precompile__()
-module VanderWaalsForces
+module VanderWaalsforces
 
 include("lennardJones.jl")
 using LinearAlgebra
 using StaticArrays
+using StaticArrays
 
-function vanderWaalsForces!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,epsilon::Float64,re::Float64)
-
-    F = MArray{Tuple{3},Float64,1,3}
+@inline function vanderWaalsForces!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,epsilon::Float64,re::Float64,F::MArray{Tuple{3},Float64,1,3})
 
     @inbounds for ii=1:Ndomains*Nmonomers
         @inbounds for jj=1:Ndomains*Nmonomers

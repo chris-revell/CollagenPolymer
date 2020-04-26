@@ -21,7 +21,7 @@ using StaticArrays
 
 using .IntraMonomerForces
 using .BendingModulus
-using .VanderWaalsForces
+using .VanderWaalsforces
 using .CalculateNoise
 using .UpdateSystem
 
@@ -39,25 +39,29 @@ const l              = 0.2
 pos                  = MMatrix{Nmonomers*Ndomains,3}(rand(Uniform(-1.0,1.0),Nmonomers*Ndomains,3))
 v                    = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3))
 
-foldername = Dates.format(Dates.now(),"yyyy-mm-dd-HH-MM-SS")
 
-mkdir("output/$(foldername)")
-open("output/$(foldername)/conditions.txt","w") do conditionsfile
-    println(conditionsfile,"Nmonomers      ",Nmonomers      )
-    println(conditionsfile,"Ndomains       ",Ndomains       )
-    println(conditionsfile,"tmax           ",tmax           )
-    println(conditionsfile,"dt             ",dt             )
-    println(conditionsfile,"outputInterval ",outputInterval )
-    println(conditionsfile,"zetaMag        ",zetaMag        )
-    println(conditionsfile,"k              ",k              )
-    println(conditionsfile,"Ebend          ",Ebend          )
-    println(conditionsfile,"epsilon        ",epsilon        )
-    println(conditionsfile,"re             ",re             )
-    println(conditionsfile,"l              ",l              )
-end
+@inline function runsim(Nmonomers::Int64,Ndomains::Int64,tmax::Float64,dt::Float64,outputInterval::Float64,zetaMag::Float64,k::Float64,Ebend::Float64,epsilon::Float64,re::Float64,l::Float64,pos::MMatrix,v::MMatrix)
 
+    foldername = Dates.format(Dates.now(),"yyyy-mm-dd-HH-MM-SS")
+    mkdir("output/$(foldername)")
+    open("output/$(foldername)/conditions.txt","w") do conditionsfile
+        println(conditionsfile,"Nmonomers      ",Nmonomers      )
+        println(conditionsfile,"Ndomains       ",Ndomains       )
+        println(conditionsfile,"tmax           ",tmax           )
+        println(conditionsfile,"dt             ",dt             )
+        println(conditionsfile,"outputInterval ",outputInterval )
+        println(conditionsfile,"zetaMag        ",zetaMag        )
+        println(conditionsfile,"k              ",k              )
+        println(conditionsfile,"Ebend          ",Ebend          )
+        println(conditionsfile,"epsilon        ",epsilon        )
+        println(conditionsfile,"re             ",re             )
+        println(conditionsfile,"l              ",l              )
+    end
 
-@inline function runsim(Nmonomers::Int64,Ndomains::Int64,tmax::Float64,dt::Float64,outputInterval::Float64,zetaMag::Float64,k::Float64,Ebend::Float64,epsilon::Float64,re::Float64,l::Float64,pos::MMatrix,v::MMatrix,foldername::String)
+    A = zeros(3)
+    B = zeros(3)
+    C  = zeros(3)
+    F = MArray{Tuple{3},Float64,1,3}(zeros(3))
 
     t=0.0
     outfile = open("output/$(foldername)/output.txt","w")
@@ -69,11 +73,11 @@ end
             Printf.@printf("Simulating: %f/%f\n",t,tmax)
         end
 
-        intraMonomerForces!(pos,v,Nmonomers,Ndomains,k,l)
+        intraMonomerforces!(pos,v,Nmonomers,Ndomains,k,l,A)
 
-        bendingModulus!(pos,v,Nmonomers,Ndomains,Ebend)
+        bendingModulus!(pos,v,Nmonomers,Ndomains,Ebend,A,B,C)
 
-        vanderWaalsForces!(pos,v,Nmonomers,Ndomains,epsilon,re)
+        vanderWaalsForces!(pos,v,Nmonomers,Ndomains,epsilon,re,F)
 
         calculateNoise!(v,Nmonomers,Ndomains,zetaMag)
 
@@ -81,7 +85,15 @@ end
 
     end
 
-    close(outfile)
+    #close(outfile)
 end
 
-runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,zetaMag,k,Ebend,epsilon,re,l,pos,v,foldername)
+runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,zetaMag,k,Ebend,epsilon,re,l,pos,v)
+
+#using BenchmarkTools
+
+#bm = @benchmark runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,zetaMag,k,Ebend,epsilon,re,l,pos,v)
+#println(minimum(bm))
+#println(mean(bm))
+#println(maximum(bm))
+#println(allocs(bm))

@@ -12,11 +12,7 @@ module BendingModulus
 using LinearAlgebra
 using StaticArrays
 
-function bendingModulus!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,Ebend::Float64)
-
-    AC = zeros(Float64,3)
-    AB = zeros(Float64,3)
-    F  = zeros(Float64,3)
+@inline function bendingModulus!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},F::Array{Float64,1})
 
     # Loop over all monomers
     @inbounds for ii=1:Nmonomers

@@ -8,7 +8,7 @@
 
 module OutputData
 
-function outputData!(pos,povrayFile,Nmonomers,t,tmax)
+@inline function outputData!(pos,povrayFile,Nmonomers,t,tmax)
   for (int jj=0 jj<Nmonomers jj++){
     for (int ii=0 ii<Monomers[jj].Ndomains*3 ii++){
       povrayFile << Monomers[jj].pos(ii,0) << ", " << Monomers[jj].pos(ii,1) << ", " << Monomers[jj].pos(ii,2) << ", " << Monomers[jj].domainLength/2.0 << ", " << t << endl
