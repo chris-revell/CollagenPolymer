@@ -13,17 +13,17 @@ using Distributions
 using LinearAlgebra
 using StaticArrays
 
-@inline function calculateNoise!(v::MMatrix,Nmonomers::Int64,Ndomains::Int64,zetaMag::Float64)
+@inline function calculateNoise!(W::MMatrix,Nmonomers::Int64,Ndomains::Int64,dt::Float64)
 
     # Loop over all monomers
     @inbounds for ii=1:Nmonomers*Ndomains
         ranTheta = 2.0*pi*rand(Uniform(0.0,1.0))
         ranPhi = pi*rand(Uniform(0.0,1.0))
-        ranR = abs(rand(Normal(0.0,zetaMag)))
+        ranR = abs(rand(Normal(0.0,dt)))
 
-        v[ii,1] += ranR*cos(ranTheta)*sin(ranPhi)
-        v[ii,2] += ranR*sin(ranTheta)*sin(ranPhi)
-        v[ii,3] += ranR*cos(ranPhi)
+        W[ii,1] += ranR*cos(ranTheta)*sin(ranPhi)
+        W[ii,2] += ranR*sin(ranTheta)*sin(ranPhi)
+        W[ii,3] += ranR*cos(ranPhi)
     end
 end
 

@@ -19,7 +19,7 @@ for i in range(int(tmax/outputInterval)):
     outfile.write("  sky <0,0,1>           \n")
     outfile.write("  direction <-1,0,0>      \n")
     outfile.write("  right <-4/3,0,0>      \n")
-    outfile.write("  location <0,-8,18> \n" )
+    outfile.write("  location <0,-15,25> \n" )
     outfile.write("  look_at <0,0,0>     \n" )
     outfile.write("  angle 15      \n")
     outfile.write("}\n")

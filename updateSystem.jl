@@ -11,10 +11,11 @@ module UpdateSystem
 using LinearAlgebra
 using StaticArrays
 
-@inline function updateSystem!(pos::MMatrix,v::MMatrix,Nmonomers::Int64,Ndomains::Int64,t::Float64,dt::Float64)
+@inline function updateSystem!(pos::MMatrix,F::MMatrix,W::MMatrix,Nmonomers::Int64,Ndomains::Int64,t::Float64,dt::Float64,D::Float64,kT::Float64)
 
-    pos .+= v.*dt
-    v .= 0
+    pos .+= F.*(dt*D/kT) .+ W.*sqrt(2.0*D)
+    F .= 0
+    W .= 0
 
     return t += dt
 
