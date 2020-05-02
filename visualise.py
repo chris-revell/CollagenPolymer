@@ -4,22 +4,23 @@ from sys import argv
 
 
 data           = np.genfromtxt("{}/output.txt".format(argv[1]),delimiter=", ")
-conditions     = np.genfromtxt("{}/conditions.txt".format(argv[1]))
-Nmonomers      = int(conditions[0,1])
-Ndomains       = int(conditions[1,1])
-tmax           = conditions[2,1]
-outputInterval = conditions[4,1]
 
-for i in range(int(tmax/outputInterval)):
+conditions = {}
+with open("{}/conditions.txt".format(argv[1])) as f:
+    for line in f:
+       (key, val) = line.split()
+       conditions[key] = float(val)
+
+for i in range(int(conditions["tmax"]/conditions["outputInterval"])):
     os.system("clear")
-    print("Rendering {}/{}".format(i,int(tmax/outputInterval)))
+    print("Rendering {}/{}".format(i,int(conditions["tmax"]/conditions["outputInterval"])))
     outfile = open("{}/povrayTmp{:03d}.pov".format(argv[1],i),"w")
     outfile.write("#include \"colors.inc\"\n")
     outfile.write("camera {\n" )
     outfile.write("  sky <0,0,1>           \n")
     outfile.write("  direction <-1,0,0>      \n")
     outfile.write("  right <-4/3,0,0>      \n")
-    outfile.write("  location <0,-15,25> \n" )
+    outfile.write("  location <0,-5,10> \n" )
     outfile.write("  look_at <0,0,0>     \n" )
     outfile.write("  angle 15      \n")
     outfile.write("}\n")
@@ -29,14 +30,14 @@ for i in range(int(tmax/outputInterval)):
     outfile.write("  color White*2 \n")
     outfile.write("}\n")
     outfile.write("background { color White }\n" )
-    subdata = data[i*Nmonomers*Ndomains:(i+1)*Nmonomers*Ndomains,:]
-    for j in range(Nmonomers):
-        for k in range(Ndomains-1):
-            outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*Ndomains+k,0],subdata[j*Ndomains+k,1],subdata[j*Ndomains+k,2],0.1))
-            outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*Ndomains+k,0],subdata[j*Ndomains+k,1],subdata[j*Ndomains+k,2],subdata[j*Ndomains+k+1,0],subdata[j*Ndomains+k+1,1],subdata[j*Ndomains+k+1,2],0.1))
-        outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[Ndomains*(j+1)-1,0],subdata[Ndomains*(j+1)-1,1],subdata[Ndomains*(j+1)-1,2],0.1))
-    #for j in range(Nmonomers*Ndomains):
-    #    outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j,0],subdata[j,1],subdata[j,2],0.1))
+    subdata = data[i*int(conditions["Nmonomers"])*int(conditions["Ndomains"]):(i+1)*int(conditions["Nmonomers"])*int(conditions["Ndomains"]),:]
+    for j in range(int(conditions["Nmonomers"])):
+        for k in range(int(conditions["Ndomains"])-1):
+            outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],conditions["σ"]/2.0))
+            outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],subdata[j*int(conditions["Ndomains"])+k+1,0],subdata[j*int(conditions["Ndomains"])+k+1,1],subdata[j*int(conditions["Ndomains"])+k+1,2],conditions["σ"]/2.0))
+        outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[int(conditions["Ndomains"])*(j+1)-1,0],subdata[int(conditions["Ndomains"])*(j+1)-1,1],subdata[int(conditions["Ndomains"])*(j+1)-1,2],conditions["σ"]/2.0))
+    #for j in range(int(conditions["Nmonomers"])*int(conditions["Ndomains"])):
+    #    outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j,0],subdata[j,1],subdata[j,2],conditions["σ"]/2.0))
     outfile.close()
     os.system("povray {}/povrayTmp{:03d}.pov > /dev/null 2>&1".format(argv[1],i))
     os.system("rm {}/povrayTmp{:03d}.pov".format(argv[1],i))
