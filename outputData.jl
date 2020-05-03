@@ -15,6 +15,7 @@ using StaticArrays
 @inline function outputData(pos::MMatrix,outfile::IOStream,t::Float64,tmax::Float64)
 
     writedlm(outfile,pos,", ")
+    flush(outfile)
     run(`clear`)
     println("Simulating: $t/$tmax")
 
