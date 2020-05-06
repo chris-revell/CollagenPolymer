@@ -29,13 +29,13 @@ using .LennardJones
                 lennardJones!(D,ϵ,σ)
                 F[ii,:] .+= D
                 F[jj,:] .-= D
-            elseif Dmag_sq < σ^2
+            elseif Dmag_sq < σ^2 && ii!=jj
                 lennardJones!(D,ϵ,σ)
                 F[ii,:] .+= D
                 F[jj,:] .-= D
             else
             end
-        
+
         end
     end
 end
