@@ -35,23 +35,23 @@ const Ndomains       = ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per
 
 # Thermodynamic parameters
 const μ              = 1.0           # Fluid viscosity
-const kT             = 2.0           # Boltzmann constant*Temperature  3.76917046 × 10-21
+const kT             = 1.0           # Boltzmann constant*Temperature  3.76917046 × 10-21
 
 # Force parameters
-const ϵLJ            = kT/100.0         # External Lennard-Jones energy
-const ϵWCA           = ϵLJ/100.0     # External Weeks-Chandler-Anderson (purely repulsive) energy. WCA = LJ+ϵ for r<re (r<σ^(1/6)) and 0 otherwise.
+const ϵLJ            = 10.0*kT        # External Lennard-Jones energy
+const ϵWCA           = ϵLJ/10.0     # External Weeks-Chandler-Anderson (purely repulsive) energy. WCA = LJ+ϵ for r<re (r<σ^(1/6)) and 0 otherwise.
 const σ              = 2.0*a         # External LJ
-const k              = 10000.0*kT           # Internal spring stiffness
+const k              = 100.0*kT           # Internal spring stiffness
 const re             = L/(Ndomains-1)# Equilibrium separation of springs connecting internal particles
-const Ebend          = 10000.0*kT           # Internal bending modulus
+const Ebend          = 1000.0*kT           # Internal bending modulus
 
 # Derived parameters
 const D = kT/(6.0*π*μ*a)             # Diffusion constant
 
 # Simulation parameters
-const tmax           = 50.0        #
-const dt             = 0.00001        #
-const outputInterval = 10.0          #
+const tmax           = 50.00        #
+const dt             = 0.001        #
+const outputInterval = 0.1          #
 const renderFlag     = 1
 
 # Data arrays
