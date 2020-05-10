@@ -60,7 +60,6 @@ const pos            = MMatrix{Nmonomers*Ndomains,3}(zeros(Nmonomers*Ndomains,3)
 const F              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3)) # xyz dimensions of all forces applied to particles
 const W              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3)) # xyz values of stochastic Wiener process for all particles
 
-
 # Define function for bringing together modules to run simulation
 @inline function runsim(Nmonomers::Int64,Ndomains::Int64,tmax::Float64,dt::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64)
 
