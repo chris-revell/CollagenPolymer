@@ -28,41 +28,41 @@ using .Initialise
 using .CreateRunDirectory
 
 # Define run parameters
-const Nmonomers      = 5             # Number of collagen monomers
+const Nmonomers      = 15            # Number of collagen monomers
 const L              = 0.5           # Length of one monomer
 const a              = 0.05          # Diameter of monomer = Diameter of particle within monomer
 const Ndomains       = ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per monomer, ensuring re<=0.4σ
+const boxSize        = 1.0           # Dimensions of cube in which particles are initialised
 
 # Thermodynamic parameters
 const μ              = 1.0           # Fluid viscosity
-const kT             = 1.0           # Boltzmann constant*Temperature  3.76917046 × 10-21
+const kT             = 2.0           # Boltzmann constant*Temperature  3.76917046 × 10-21
 
 # Force parameters
-const ϵLJ            = 10.0*kT        # External Lennard-Jones energy
-const ϵWCA           = ϵLJ/10.0     # External Weeks-Chandler-Anderson (purely repulsive) energy. WCA = LJ+ϵ for r<re (r<σ^(1/6)) and 0 otherwise.
+const ϵLJ            = kT/1.0       # External Lennard-Jones energy
+#const ϵWCA           = ϵLJ/10.0     # External Weeks-Chandler-Anderson (purely repulsive) energy. WCA = LJ+ϵ for r<re (r<σ^(1/6)) and 0 otherwise.
 const σ              = 2.0*a         # External LJ
-const k              = 100.0*kT           # Internal spring stiffness
+const k              = 100.0*kT      # Internal spring stiffness
 const re             = L/(Ndomains-1)# Equilibrium separation of springs connecting internal particles
-const Ebend          = 1000.0*kT           # Internal bending modulus
+const Ebend          = 100.0*kT      # Internal bending modulus
 
 # Derived parameters
 const D = kT/(6.0*π*μ*a)             # Diffusion constant
 
 # Simulation parameters
-const tmax           = 50.00        #
-const dt             = 0.001        #
-const outputInterval = 0.1          #
-const renderFlag     = 1
+const tmax           = 2000.00       # Total simulation time
+const dt             = 0.0001        # Time step between iterations
+const outputInterval = tmax/100.0           # Time interval for writing position data to file
+const renderFlag     = 1             # Controls whether or not system is visualised with povRay automatically
 
 # Data arrays
-const pos            = MMatrix{Nmonomers*Ndomains,3}(zeros(Nmonomers*Ndomains,3))                   #
-const F              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3))                   #
-const W              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3))                   #
+const pos            = MMatrix{Nmonomers*Ndomains,3}(zeros(Nmonomers*Ndomains,3)) # xyz positions of all particles
+const F              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3)) # xyz dimensions of all forces applied to particles
+const W              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3)) # xyz values of stochastic Wiener process for all particles
 
-# %%
 
 # Define function for bringing together modules to run simulation
-@inline function runsim(Nmonomers::Int64,Ndomains::Int64,tmax::Float64,dt::Float64,outputInterval::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64)
+@inline function runsim(Nmonomers::Int64,Ndomains::Int64,tmax::Float64,dt::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64)
 
     # Allocate variables needed for calculations
     t = 0.0
@@ -73,7 +73,7 @@ const W              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3)
     foldername = createRunDirectory(Nmonomers,L,a,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,dt,outputInterval)
     outfile = open("output/$(foldername)/output.txt","w")
 
-    initialise(pos,Nmonomers,Ndomains,re,0.5)
+    initialise(pos,Nmonomers,Ndomains,re,boxSize)
 
     while t<tmax
 
@@ -99,9 +99,7 @@ const W              = MMatrix{Nmonomers*Ndomains,3}(zeros(Ndomains*Nmonomers,3)
     end
 end
 
-#%%
-
-runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag)
+runsim(Nmonomers,Ndomains,tmax,dt,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag)
 
 #using BenchmarkTools
 

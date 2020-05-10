@@ -29,7 +29,7 @@ using .LennardJones
                     lennardJones!(D,ϵ,σ)
                     F[ii,:] .+= D
                     F[jj,:] .-= D
-                elseif Dmag_sq < (2.0^(1.0/6.0)*σ)^2
+                elseif Dmag_sq < σ^2 #(2.0^(1.0/6.0)*σ)^2
                     # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
                     lennardJones!(D,ϵ/100.0,σ)
                     F[ii,:] .+= D
