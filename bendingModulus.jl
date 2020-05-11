@@ -12,11 +12,11 @@ module BendingModulus
 using LinearAlgebra
 using StaticArrays
 
-@inline function bendingModulus!(pos::MMatrix,F::MMatrix,Nmonomers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},D::Array{Float64,1})
+@inline function bendingModulus!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},D::Array{Float64,1})
 
-    # Loop over all monomers
-    @inbounds for ii=0:Nmonomers-1
-        # Loop over all sets of 3 in each monomer chain
+    # Loop over all trimers
+    @inbounds for ii=0:Ntrimers-1
+        # Loop over all sets of 3 in each trimer chain
         @inbounds for jj=1:Ndomains-2
 
             AC = pos[ii*Ndomains+jj+2,:] .- pos[ii*Ndomains+jj,:]

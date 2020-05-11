@@ -12,11 +12,11 @@ using StaticArrays
 using Random
 using Distributions
 
-@inline function initialise(pos::MMatrix,Nmonomers::Int64,Ndomains::Int64,domainLength::Float64,boxsize::Float64)
+@inline function initialise(pos::MMatrix,Ntrimers::Int64,Ndomains::Int64,domainLength::Float64,boxsize::Float64)
     initialx = zeros(3)
     initialAngle = zeros(2)
 
-    for ii=0:Nmonomers-1
+    for ii=0:Ntrimers-1
         initialx     .= rand(Uniform(-boxsize,boxsize),3)
         initialAngle .= rand(Uniform(0.0,π),2) .* [2.0,1.0]
         for jj=1:Ndomains

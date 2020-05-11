@@ -10,12 +10,12 @@ module CreateRunDirectory
 
 using Dates
 
-function createRunDirectory(Nmonomers,L,a,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,dt,outputInterval)
+function createRunDirectory(Ntrimers,L,a,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,dt,outputInterval)
 
     foldername = Dates.format(Dates.now(),"yyyy-mm-dd-HH-MM-SS")
     mkdir("output/$(foldername)")
     open("output/$(foldername)/conditions.txt","w") do conditionsfile
-        println(conditionsfile,"Nmonomers      $Nmonomers      ")
+        println(conditionsfile,"Ntrimers      $Ntrimers      ")
         println(conditionsfile,"L              $L              ")
         println(conditionsfile,"a              $a              ")
         println(conditionsfile,"Ndomains       $Ndomains       ")

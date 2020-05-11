@@ -1,3 +1,4 @@
+#! /usr/local/bin/python3
 import numpy as np
 import os
 from sys import argv
@@ -30,13 +31,13 @@ for i in range(int(conditions["tmax"]/conditions["outputInterval"])):
     outfile.write("  color White*2 \n")
     outfile.write("}\n")
     outfile.write("background { color White }\n" )
-    subdata = data[i*int(conditions["Nmonomers"])*int(conditions["Ndomains"]):(i+1)*int(conditions["Nmonomers"])*int(conditions["Ndomains"]),:]
-    for j in range(int(conditions["Nmonomers"])):
+    subdata = data[i*int(conditions["Ntrimers"])*int(conditions["Ndomains"]):(i+1)*int(conditions["Ntrimers"])*int(conditions["Ndomains"]),:]
+    for j in range(int(conditions["Ntrimers"])):
         for k in range(int(conditions["Ndomains"])-1):
             outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],conditions["σ"]/2.0))
             outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],subdata[j*int(conditions["Ndomains"])+k+1,0],subdata[j*int(conditions["Ndomains"])+k+1,1],subdata[j*int(conditions["Ndomains"])+k+1,2],conditions["σ"]/2.0))
         outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[int(conditions["Ndomains"])*(j+1)-1,0],subdata[int(conditions["Ndomains"])*(j+1)-1,1],subdata[int(conditions["Ndomains"])*(j+1)-1,2],conditions["σ"]/2.0))
-    #for j in range(int(conditions["Nmonomers"])*int(conditions["Ndomains"])):
+    #for j in range(int(conditions["Ntrimers"])*int(conditions["Ndomains"])):
     #    outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j,0],subdata[j,1],subdata[j,2],conditions["σ"]/2.0))
     outfile.close()
     os.system("povray {}/povrayTmp{:03d}.pov > /dev/null 2>&1".format(argv[1],i))

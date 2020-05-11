@@ -1,19 +1,19 @@
 #
-#  intraMonomerForces.jl
+#  intraTrimerForces.jl
 #  collagen-model
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
 #
 __precompile__()
-module IntraMonomerForces
+module IntraTrimerForces
 
 using LinearAlgebra
 using StaticArrays
 
-@inline function intraMonomerforces!(pos::MMatrix,F::MMatrix,Nmonomers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
-	# Tension forces between monomer domains
-	@inbounds for ii=0:Nmonomers-1
+@inline function intraTrimerforces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
+	# Tension forces between trimer domains
+	@inbounds for ii=0:Ntrimers-1
 		@inbounds for jj=1:Ndomains-1
 		    dx = pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]
 		    dx_mag = sqrt(dot(dx,dx))
@@ -24,6 +24,6 @@ using StaticArrays
 	end
 end
 
-export intraMonomerforces!
+export intraTrimerforces!
 
 end
