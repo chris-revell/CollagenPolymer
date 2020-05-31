@@ -15,9 +15,9 @@ using StaticArrays
 @inline function bendingModulus!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},D::Array{Float64,1})
 
     # Loop over all trimers
-    @inbounds for ii=0:Ntrimers-1
+    for ii=0:Ntrimers-1
         # Loop over all sets of 3 in each trimer chain
-        @inbounds for jj=1:Ndomains-2
+        for jj=1:Ndomains-2
 
             AC = pos[ii*Ndomains+jj+2,:] .- pos[ii*Ndomains+jj,:]
             AB = pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]

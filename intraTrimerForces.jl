@@ -13,8 +13,8 @@ using StaticArrays
 
 @inline function intraTrimerforces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
 	# Tension forces between trimer domains
-	@inbounds for ii=0:Ntrimers-1
-		@inbounds for jj=1:Ndomains-1
+	for ii=0:Ntrimers-1
+		for jj=1:Ndomains-1
 		    dx = pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]
 		    dx_mag = sqrt(dot(dx,dx))
 		    dif = dx_mag - re

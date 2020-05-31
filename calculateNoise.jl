@@ -16,7 +16,7 @@ using StaticArrays
 @inline function calculateNoise!(W::MMatrix,Ntrimers::Int64,Ndomains::Int64,dt::Float64)
 
     # Loop over all trimers
-    @inbounds for ii=1:Ntrimers*Ndomains
+    for ii=1:Ntrimers*Ndomains
         ranTheta = 2.0*pi*rand(Uniform(0.0,1.0))
         ranPhi = pi*rand(Uniform(0.0,1.0))
         ranR = abs(rand(Normal(0.0,dt)))
