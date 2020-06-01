@@ -19,7 +19,7 @@ using StaticArrays
     for ii=1:Ntrimers*Ndomains
         ranTheta = 2.0*pi*rand(Uniform(0.0,1.0))
         ranPhi = pi*rand(Uniform(0.0,1.0))
-        ranR = abs(rand(Normal(0.0,dt)))
+        ranR = abs(rand(Normal(0.0,sqrt(dt))))
 
         W[ii,1] += ranR*cos(ranTheta)*sin(ranPhi)
         W[ii,2] += ranR*sin(ranTheta)*sin(ranPhi)
