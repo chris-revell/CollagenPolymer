@@ -28,7 +28,7 @@ using .Initialise
 using .CreateRunDirectory
 
 # Define run parameters
-const Ntrimers       = 5            # Number of collagen trimers
+const Ntrimers       = 15            # Number of collagen trimers
 const L              = 0.5           # Length of one trimer
 const a              = 0.05          # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
@@ -39,9 +39,9 @@ const μ              = 1.0           # Fluid viscosity
 const kT             = 1.0         # Boltzmann constant*Temperature  3.76917046 × 10-21
 
 # Force parameters
-const ϵLJ            = 1.0*kT       # External Lennard-Jones energy
+const ϵLJ            = 10.0*kT       # External Lennard-Jones energy
 #const ϵWCA           = ϵLJ/10.0     # External Weeks-Chandler-Anderson (purely repulsive) energy. WCA = LJ+ϵ for r<re (r<σ^(1/6)) and 0 otherwise.
-const σ              = 2.0*a         # External LJ length scale (separation at which V=0) = 2*particle radius
+const σ              = a#2.0*a         # External LJ length scale (separation at which V=0) = 2*particle radius
 const k              = 10.0*kT      # Internal spring stiffness for forces between adjacent particles within a trimer
 const re             = L/(Ndomains-1)# Equilibrium separation of springs connecting adjacent particles within a trimer
 const Ebend          = 10.0*kT     # Internal bending modulus of trimer
@@ -62,7 +62,7 @@ const pos            = MMatrix{Ntrimers*Ndomains,3}(zeros(Ntrimers*Ndomains,3)) 
 const F              = MMatrix{Ntrimers*Ndomains,3}(zeros(Ndomains*Ntrimers,3)) # xyz dimensions of all forces applied to particles
 const W              = MMatrix{Ntrimers*Ndomains,3}(zeros(Ndomains*Ntrimers,3)) # xyz values of stochastic Wiener process for all particles
 const Ng             = 2*ceil(Int64,2.0*boxSize/(4.0*σ))+1
-const cellLists      = zeros(Int64,Ng,Ng,Ng,30) # Cell list grid. Too many components for static array?
+const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many components for static array?
 
 
 # Define function for bringing together modules to run simulation

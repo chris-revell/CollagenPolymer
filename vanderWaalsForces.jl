@@ -29,12 +29,12 @@ using .LennardJones
 
                                     celllabel2 = cellLists[kk+xx,ll+yy,mm+zz,jj+1]
 
-                                    if celllabel1==celllabel2 floor(Int8,(celllabel1-1)/Ndomains)==floor(Int8,(celllabel2-1)/Ndomains)
-                                        # Skip particles in same trimer
+                                    if floor(Int8,(celllabel1-1)/Ndomains)==floor(Int8,(celllabel2-1)/Ndomains) && abs(celllabel1-celllabel2)<=1
+                                        # Skip adjacent particles in same trimer
                                     else
                                         D = pos[celllabel2,:] .- pos[celllabel1,:]
                                         Dmag_sq = dot(D,D)
-                                        if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains
+                                        if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains && floor(Int8,(celllabel1-1)/Ndomains)!=floor(Int8,(celllabel2-1)/Ndomains)
                                             # Apply adhesive van der waals force in stepped fashion between trimers
                                             lennardJones!(D,ϵ,σ)
                                             F[celllabel1,:] .+= D
