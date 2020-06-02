@@ -28,7 +28,7 @@ using .Initialise
 using .CreateRunDirectory
 
 # Define run parameters
-const Ntrimers       = 1            # Number of collagen trimers
+const Ntrimers       = 2             # Number of collagen trimers
 const L              = 0.5           # Length of one trimer
 const a              = 0.05          # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
@@ -36,24 +36,24 @@ const boxSize        = 1.0           # Dimensions of cube in which particles are
 
 # Thermodynamic parameters
 const μ              = 1.0           # Fluid viscosity
-const kT             = 1.0         # Boltzmann constant*Temperature  3.76917046 × 10-21
+const kT             = 1.0           # Boltzmann constant*Temperature  3.76917046 × 10-21
 
 # Force parameters
-const ϵLJ            = 10.0*kT       # External Lennard-Jones energy
+const ϵLJ            = 100.0*kT      # External Lennard-Jones energy
 #const ϵWCA           = ϵLJ/10.0     # External Weeks-Chandler-Anderson (purely repulsive) energy. WCA = LJ+ϵ for r<re (r<σ^(1/6)) and 0 otherwise.
-const σ              = a#2.0*a         # External LJ length scale (separation at which V=0) = 2*particle radius
-const k              = 1000.0*kT      # Internal spring stiffness for forces between adjacent particles within a trimer
+const σ              = a#2.0*a       # External LJ length scale (separation at which V=0) = 2*particle radius
+const k              = 1000.0*kT     # Internal spring stiffness for forces between adjacent particles within a trimer
 const re             = L/(Ndomains-1)# Equilibrium separation of springs connecting adjacent particles within a trimer
-const Ebend          = 10.0*kT     # Internal bending modulus of trimer
+const Ebend          = 10.0*kT       # Internal bending modulus of trimer
 
 # Derived parameters
 const D              = kT/(6.0*π*μ*a)# Diffusion constant
 const trimerVolume   = L*π*a^2       # Volume of one trimer
-const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
+#const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
 # Simulation parameters
-const tmax           = 10.00        # Total simulation time
-dt             = 0.0001      # Time step between iterations
+const tmax           = 10.00         # Total simulation time
+dt             = 0.0001              # Time step between iterations
 const outputInterval = tmax/100.0    # Time interval for writing position data to file
 const renderFlag     = 1             # Controls whether or not system is visualised with povRay automatically
 
@@ -83,14 +83,20 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
 
         if (t%outputInterval)<dt
             outputData(pos,outfile,t,tmax)
+
+            for i=1:Ntrimers
+                for j=1:Ndomains
+                    
+
         end
 
         # Create cell list to identify trimer pairs within interaction range
         fill!(cellLists,0)
+        # Apply periodic boundary conditions
+        pos .= (pos .+ boxSize).%boxSize
+
         for i=1:Ntrimers*Ndomains
-            #println((pos[i,:] .+ 2.0*boxSize)./(4.0*σ))
             iₓ = ceil.(Int64,(pos[i,:] .+ 2.0*boxSize)./(4.0*σ))
-            #println(iₓ)
             cellLists[iₓ...,1] += 1
             cellLists[iₓ...,cellLists[iₓ...,1]+1] = i
         end
