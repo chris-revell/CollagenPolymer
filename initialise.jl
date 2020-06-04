@@ -17,7 +17,7 @@ using Distributions
     initialAngle = zeros(2)
 
     for ii=0:Ntrimers-1
-        initialx     .= rand(Uniform(0,boxsize),3)
+        initialx     .= rand(Uniform(-boxsize/2.0,boxsize/2.0),3)
         initialAngle .= rand(Uniform(0.0,π),2) .* [2.0,1.0]
         for jj=1:Ndomains
             pos[ii*Ndomains+jj,1] = initialx[1]+(jj-1)*domainLength*cos(initialAngle[1])*sin(initialAngle[2]);
