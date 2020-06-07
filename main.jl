@@ -51,12 +51,12 @@ const trimerVolume   = L*π*a^2       # Volume of one trimer
 #const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
 # Simulation parameters
-const tmax           = 5.00          # Total simulation time
+const tmax           = 5.0          # Total simulation time
 const outputInterval = tmax/100.0    # Time interval for writing position data to file
 const renderFlag     = 1             # Controls whether or not system is visualised with povRay automatically
-const interactionThreshold = 2.0*σ   # Threshold for van der Waals interactions
+const intrctnThrshld = 2.0*σ   # Threshold for van der Waals interactions
 const boxMultiples   = 4             # Multiple of boxsizes over which to define cell list grid to allow for system expansion
-const Ng             = ceil(Int64,boxMultiples*boxSize/interactionThreshold)+1 #
+const Ng             = ceil(Int64,boxMultiples*boxSize/intrctnThrshld)+1 #
 
 # Data arrays
 const pos            = MMatrix{Ntrimers*Ndomains,3}(zeros(Ntrimers*Ndomains,3)) # xyz positions of all particles
@@ -66,7 +66,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
 
 
 # Define function for bringing together modules to run simulation
-@inline function runsim(Ntrimers::Int64,Ndomains::Int64,tmax::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64,Ng::Int64,cellLists::Array{Int64},interactionThreshold::Float64,boxMultiples::Int64)
+@inline function runsim(Ntrimers::Int64,Ndomains::Int64,tmax::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64,Ng::Int64,cellLists::Array{Int64},intrctnThrshld::Float64,boxMultiples::Int64)
 
     # Initialise system time
     t = 0.0
@@ -96,7 +96,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         # Create cell list to identify trimer pairs within interaction range
         fill!(cellLists,0)
         for i=1:Ntrimers*Ndomains
-            iₓ = ceil.(Int64,(pos[i,:] .+ boxMultiples*boxSize/2.0)./interactionThreshold)
+            iₓ = ceil.(Int64,(pos[i,:] .+ boxMultiples*boxSize/2.0)./intrctnThrshld)
             #println(iₓ)
             cellLists[iₓ...,1] += 1
             cellLists[iₓ...,cellLists[iₓ...,1]+1] = i
@@ -123,7 +123,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         t = updateSystem!(pos,F,W,Ntrimers,Ndomains,t,dt,D,kT)
 
         if (t%outputInterval)<dt
-            outputData(pos,outfile,t,tmax)            
+            outputData(pos,outfile,t,tmax)
             # Measure trimer lengths
         #    for i=1:Ntrimers
         #        for j=1:Ndomains
@@ -138,4 +138,4 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
     end
 end
 
-runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,interactionThreshold,boxMultiples)
+runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples)
