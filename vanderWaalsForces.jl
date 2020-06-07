@@ -13,9 +13,7 @@ using LinearAlgebra
 using StaticArrays
 using .LennardJones
 
-@inline function vanderWaalsForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int64},Ng::Int64)
-
-    WCAthresh_sq = (2.0^(1.0/6.0)*σ)^2 # Cutoff threshold for WCA potential - separation at which force is zero - squared
+@inline function vanderWaalsForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int64},Ng::Int64,WCAthresh_sq::Float64,NgThreshold::Float64)
 
     for kk=2:Ng-1
         for ll=2:Ng-1
@@ -34,18 +32,22 @@ using .LennardJones
                                     else
                                         D = pos[celllabel2,:] .- pos[celllabel1,:]
                                         Dmag_sq = dot(D,D)
-                                        if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains && floor(Int8,(celllabel1-1)/Ndomains)!=floor(Int8,(celllabel2-1)/Ndomains)
-                                            # Apply adhesive van der waals force in stepped fashion between trimers
-                                            lennardJones!(D,ϵ,σ)
-                                            F[celllabel1,:] .+= D
-                                            F[celllabel2,:] .-= D
-                                        elseif Dmag_sq < WCAthresh_sq
-                                            # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
-                                            lennardJones!(D,ϵ/100.0,σ)
-                                            F[celllabel1,:] .+= D
-                                            F[celllabel2,:] .-= D
+                                        if Dmag_sq > NgThreshold^2
+                                            # Skip pairs with separation beyond threshold (technically some may exist despite cell list)
                                         else
-                                            # Outside range of WCA so do nothing
+                                            if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains && floor(Int8,(celllabel1-1)/Ndomains)!=floor(Int8,(celllabel2-1)/Ndomains)
+                                                # Apply adhesive van der waals force in stepped fashion between trimers
+                                                lennardJones!(D,ϵ,σ)
+                                                F[celllabel1,:] .+= D
+                                                F[celllabel2,:] .-= D
+                                            elseif Dmag_sq < WCAthresh_sq
+                                                # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
+                                                lennardJones!(D,ϵ,σ)
+                                                F[celllabel1,:] .+= D
+                                                F[celllabel2,:] .-= D
+                                            else
+                                                # Skip any pairs within interaction range, beyond WCA range, and without specified adhesive rule
+                                            end
                                         end
                                     end
                                 end
