@@ -9,6 +9,7 @@
 # Import Julia packages
 using Distributions
 using StaticArrays
+using LinearAlgebra
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
@@ -28,22 +29,23 @@ using .Initialise
 using .CreateRunDirectory
 
 # Define run parameters
-const Ntrimers       = 20             # Number of collagen trimers
-const L              = 0.5           # Length of one trimer
-const a              = 0.05          # Diameter of trimer = Diameter of particle within trimer
+const Ntrimers       = 2             # Number of collagen trimers
+const L              = 1.0           # Length of one trimer
+const a              = 0.1          # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
 const boxSize        = 1.0           # Dimensions of cube in which particles are initialised
 
 # Thermodynamic parameters
 const μ              = 1.0           # Fluid viscosity
-const kT             = 1.0           # Boltzmann constant*Temperature  3.76917046 × 10-21
+const kT             = 1.0           # Boltzmann constant*Temperature
 
 # Force parameters
 const ϵLJ            = 1.0*kT        # External Lennard-Jones energy
+const WCAthresh_sq   = (2.0^(1.0/6.0)*σ)^2 # Cutoff threshold for WCA potential - separation at which force is zero - squared
 const σ              = a             # External LJ length scale (separation at which V=0) = 2*particle radius
-const k              = 1000.0*kT     # Internal spring stiffness for forces between adjacent particles within a trimer
-const re             = L/(Ndomains-1)# Equilibrium separation of springs connecting adjacent particles within a trimer
-const Ebend          = 100000.0*kT   # Internal bending modulus of trimer
+const k              = 1000000.0*kT     # Internal spring stiffness for forces between adjacent particles within a trimer
+const re             = (L-σ)/(Ndomains-1)# Equilibrium separation of springs connecting adjacent particles within a trimer
+const Ebend          = 0.0#100000.0*kT   # Internal bending modulus of trimer
 
 # Derived parameters
 const D              = kT/(6.0*π*μ*a)# Diffusion constant
@@ -51,12 +53,12 @@ const trimerVolume   = L*π*a^2       # Volume of one trimer
 #const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
 # Simulation parameters
-const tmax           = 5.00          # Total simulation time
+const tmax           = 0.01          # Total simulation time
 const outputInterval = tmax/100.0    # Time interval for writing position data to file
 const renderFlag     = 1             # Controls whether or not system is visualised with povRay automatically
-const interactionThreshold = 2.0*σ   # Threshold for van der Waals interactions
+const NgThreshold    = 4.0*σ         # Threshold for van der Waals interactions
 const boxMultiples   = 4             # Multiple of boxsizes over which to define cell list grid to allow for system expansion
-const Ng             = ceil(Int64,boxMultiples*boxSize/interactionThreshold)+1 #
+const Ng             = ceil(Int64,boxMultiples*boxSize/NgThreshold)+1 # Dimensions of cell list grid
 
 # Data arrays
 const pos            = MMatrix{Ntrimers*Ndomains,3}(zeros(Ntrimers*Ndomains,3)) # xyz positions of all particles
@@ -66,7 +68,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
 
 
 # Define function for bringing together modules to run simulation
-@inline function runsim(Ntrimers::Int64,Ndomains::Int64,tmax::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64,Ng::Int64,cellLists::Array{Int64},interactionThreshold::Float64,boxMultiples::Int64)
+@inline function runsim(Ntrimers::Int64,Ndomains::Int64,tmax::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64,Ng::Int64,cellLists::Array{Int64},NgThreshold::Float64,boxMultiples::Int64,WCAthresh_sq::Float64)
 
     # Initialise system time
     t = 0.0
@@ -96,7 +98,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         # Create cell list to identify trimer pairs within interaction range
         fill!(cellLists,0)
         for i=1:Ntrimers*Ndomains
-            iₓ = ceil.(Int64,(pos[i,:] .+ boxMultiples*boxSize/2.0)./interactionThreshold)
+            iₓ = ceil.(Int64,(pos[i,:] .+ boxMultiples*boxSize/2.0)./NgThreshold)
             #println(iₓ)
             cellLists[iₓ...,1] += 1
             cellLists[iₓ...,cellLists[iₓ...,1]+1] = i
@@ -110,7 +112,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         bendingModulus!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        vanderWaalsForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng)
+        vanderWaalsForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng,WCAthresh_sq,NgThreshold)
 
         # Adapt timestep to maximum force value
         Fmax_sq = max(sum(F.*F,dims=2)...)
@@ -123,10 +125,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         t = updateSystem!(pos,F,W,Ntrimers,Ndomains,t,dt,D,kT)
 
         if (t%outputInterval)<dt
-            outputData(pos,outfile,t,tmax)            
-            # Measure trimer lengths
-        #    for i=1:Ntrimers
-        #        for j=1:Ndomains
+            outputData(pos,outfile,t,tmax)
         end
 
     end
@@ -138,4 +137,4 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
     end
 end
 
-runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,interactionThreshold,boxMultiples)
+runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,NgThreshold,boxMultiples,WCAthresh_sq)
