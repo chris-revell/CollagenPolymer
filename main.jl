@@ -31,7 +31,7 @@ using .CreateRunDirectory
 # Define run parameters
 const Ntrimers       = 2             # Number of collagen trimers
 const L              = 1.0           # Length of one trimer
-const a              = 0.1           # Diameter of trimer = Diameter of particle within trimer
+const a              = 0.01          # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
 const boxSize        = 1.0           # Dimensions of cube in which particles are initialised
 
@@ -87,7 +87,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
     initialise(pos,Ntrimers,Ndomains,re,boxSize)
 
     # Output initial state
-    outputData(pos,outfile,t,tmax,Ntrimers,Ndomains)
+    outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
 
     #Iterate over time until max system time is reached
     while t<tmax
@@ -124,7 +124,7 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         t = updateSystem!(pos,F,W,Ntrimers,Ndomains,t,dt,D,kT)
 
         if (t%outputInterval)<dt
-            outputData(pos,outfile,t,tmax,Ntrimers,Ndomains)
+            outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
         end
 
     end

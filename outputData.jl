@@ -11,8 +11,9 @@ module OutputData
 using Printf
 using DelimitedFiles
 using StaticArrays
+using LinearAlgebra
 
-@inline function outputData(pos::MMatrix,outfile::IOStream,t::Float64,tmax::Float64)
+@inline function outputData(pos::MMatrix,outfile::IOStream,t::Float64,tmax::Float64,Ntrimers::Int64,Ndomains::Int64,σ::Float64)
 
     writedlm(outfile,pos,", ")
     flush(outfile)
@@ -26,7 +27,7 @@ using StaticArrays
             dx = pos[i*Ndomains+j+1,:]-pos[i*Ndomains+j,:]
             l += sqrt(dot(dx,dx))
         end
-        println("$(i+1) => $l, $(l/σ), re=$re, Ndomains=$Ndomains")
+        println("$(i+1) => $(l+σ), Ndomains=$Ndomains")
     end
 
 end
