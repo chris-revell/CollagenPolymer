@@ -1,5 +1,5 @@
 #
-#  bendingModulus.jl
+#  bendingForces.jl
 #  collagen-model
 #
 #  Created by Christopher Revell on 30/03/2020.
@@ -7,12 +7,12 @@
 #
 
 __precompile__()
-module BendingModulus
+module BendingForces
 
 using LinearAlgebra
 using StaticArrays
 
-@inline function bendingModulus!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},D::Array{Float64,1})
+@inline function bendingForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},D::Array{Float64,1})
 
     # Loop over all trimers
     for ii=0:Ntrimers-1
@@ -30,6 +30,6 @@ using StaticArrays
     end
 end
 
-export bendingModulus!
+export bendingForces!
 
 end

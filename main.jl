@@ -14,14 +14,14 @@ using LinearAlgebra
 include("./outputData.jl")
 include("./calculateNoise.jl")
 include("./updateSystem.jl")
-include("./intraTrimerForces.jl")
-include("./vanderWaalsForces.jl")
-include("./bendingModulus.jl")
+include("./tensionForces.jl")
+include("./interTrimerForces.jl")
+include("./bendingForces.jl")
 include("./initialise.jl")
 include("./createRunDirectory.jl")
-using .IntraTrimerForces
-using .BendingModulus
-using .VanderWaalsforces
+using .TensionForces
+using .BendingForces
+using .InterTrimerForces
 using .CalculateNoise
 using .UpdateSystem
 using .OutputData
@@ -31,7 +31,7 @@ using .CreateRunDirectory
 # Define run parameters
 const Ntrimers       = 2             # Number of collagen trimers
 const L              = 1.0           # Length of one trimer
-const a              = 0.01          # Diameter of trimer = Diameter of particle within trimer
+const a              = 0.1          # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
 const boxSize        = 1.0           # Dimensions of cube in which particles are initialised
 
@@ -105,13 +105,13 @@ const cellLists      = zeros(Int64,Ng,Ng,Ng,50) # Cell list grid. Too many compo
         end
 
         # Spring forces between particles along trimer chain
-        intraTrimerforces!(pos,F,Ntrimers,Ndomains,k,re,AA)
+        tensionForces!(pos,F,Ntrimers,Ndomains,k,re,AA)
 
         # Calculate forces from trimer bending stiffness
-        bendingModulus!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
+        bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        vanderWaalsForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng,WCAthresh_sq,intrctnThrshld)
+        interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng,WCAthresh_sq,intrctnThrshld)
 
         # Adapt timestep to maximum force value
         Fmax_sq = max(sum(F.*F,dims=2)...)

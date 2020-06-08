@@ -6,12 +6,12 @@
 #
 #
 __precompile__()
-module IntraTrimerForces
+module TensionForces
 
 using LinearAlgebra
 using StaticArrays
 
-@inline function intraTrimerforces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
+@inline function tensionForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
 	# Tension forces between trimer domains
 	for ii=0:Ntrimers-1
 		for jj=1:Ndomains-1
@@ -24,6 +24,6 @@ using StaticArrays
 	end
 end
 
-export intraTrimerforces!
+export tensionForces!
 
 end

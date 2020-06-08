@@ -1,19 +1,19 @@
 #
-#  vanderWaalsForces.jl
+#  interTrimerForces.jl
 #  collagen-model
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
 #
 __precompile__()
-module VanderWaalsforces
+module InterTrimerForces
 
 include("lennardJones.jl")
 using LinearAlgebra
 using StaticArrays
 using .LennardJones
 
-@inline function vanderWaalsForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int64},Ng::Int64,WCAthresh_sq::Float64,NgThreshold::Float64)
+@inline function interTrimerForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int64},Ng::Int64,WCAthresh_sq::Float64,NgThreshold::Float64)
 
     for kk=2:Ng-1
         for ll=2:Ng-1
@@ -61,6 +61,6 @@ using .LennardJones
 
 end
 
-export vanderWaalsForces!
+export interTrimerForces!
 
 end
