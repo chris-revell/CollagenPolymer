@@ -1,6 +1,6 @@
 #
 #  interTrimerForces.jl
-#  collagen-model
+#  collagen-model-jl
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
@@ -13,11 +13,14 @@ using LinearAlgebra
 using StaticArrays
 using .LennardJones
 
-@inline function interTrimerForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int64},Ng::Int64,WCAthresh_sq::Float64,NgThreshold::Float64)
+@inline function interTrimerForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int16},Ng::Int64,WCAthresh_sq::Float64,NgThreshold::Float64,nonZeroGrids::Array{Array{Int16,1},1},Nfilled::Int64)
 
-    for kk=2:Ng-1
-        for ll=2:Ng-1
-            for mm=2:Ng-1
+
+            for nn=1:Nfilled
+                #println(cellLists[nonZeroGrids[nn]...,1])
+
+                kk,ll,mm = nonZeroGrids[nn]
+
                 for ii=1:cellLists[kk,ll,mm,1]
                     celllabel1 = cellLists[kk,ll,mm,ii+1]
                     for xx=-1:1
@@ -55,8 +58,8 @@ using .LennardJones
                         end
                     end
                 end
-            end
-        end
+
+
     end
 
 end
