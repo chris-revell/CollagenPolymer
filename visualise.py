@@ -1,4 +1,12 @@
 #! /usr/local/bin/python3
+#
+#  visualise.py
+#  collagen-model-jl
+#
+#  Created by Christopher Revell on 30/03/2020.
+#
+#
+
 import numpy as np
 import os
 from sys import argv

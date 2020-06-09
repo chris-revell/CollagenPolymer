@@ -1,6 +1,6 @@
 #
 #  createRunDirectory.jl
-#  collagen-model
+#  collagen-model-jl
 #
 #  Created by Christopher Revell on 02/05/2020.
 #

@@ -1,6 +1,6 @@
 #
 #  bendingForces.jl
-#  collagen-model
+#  collagen-model-jl
 #
 #  Created by Christopher Revell on 30/03/2020.
 #

@@ -1,6 +1,6 @@
 #
 #  initialise.jl
-#  collagen-model
+#  collagen-model-jl
 #
 #  Created by Christopher Revell on 01/05/2020.
 #
