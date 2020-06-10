@@ -17,7 +17,7 @@ using StaticArrays
     # Loop over all trimers
     for ii=0:Ntrimers-1
         # Loop over all sets of 3 in each trimer chain
-        for jj=1:Ndomains-2
+        for jj=1:Ndomains-2 #Threads.@threads for jj=1:Ndomains-2
 
             AC = pos[ii*Ndomains+jj+2,:] .- pos[ii*Ndomains+jj,:]
             AB = pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]

@@ -14,7 +14,7 @@ using StaticArrays
 @inline function tensionForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
 	# Tension forces between trimer domains
 	for ii=0:Ntrimers-1
-		for jj=1:Ndomains-1
+		for jj=1:Ndomains-1 #Threads.@threads for jj=1:Ndomains-1
 		    dx = pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]
 		    dx_mag = sqrt(dot(dx,dx))
 		    dif = dx_mag - re

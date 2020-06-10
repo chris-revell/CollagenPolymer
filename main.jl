@@ -31,7 +31,7 @@ using .Initialise
 using .CreateRunDirectory
 
 # Define run parameters
-const Ntrimers       = 2                  # Number of collagen trimers
+const Ntrimers       = 10                  # Number of collagen trimers
 const L              = 1.0                # Length of one trimer
 const a              = 0.01               # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
@@ -55,7 +55,7 @@ const trimerVolume   = L*π*a^2            # Volume of one trimer
 #const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
 # Simulation parameters
-const tmax           = 5.0              # Total simulation time
+const tmax           = 0.00001              # Total simulation time
 const outputInterval = tmax/100.0         # Time interval for writing position data to file
 const renderFlag     = 0                  # Controls whether or not system is visualised with povRay automatically
 const intrctnThrshld = 2.0*σ              # Threshold for van der Waals interactions
@@ -143,10 +143,13 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
     end
 end
 
-runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+#runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 
-using Profile
+# using Profile
 #
 # Profile.clear()
-# @profile runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq)
+# @profile runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 # Juno.profiler(; C=true)
+
+#using BenchmarkTools
+#@benchmark runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
