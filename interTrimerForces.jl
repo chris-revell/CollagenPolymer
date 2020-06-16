@@ -12,12 +12,11 @@ include("lennardJones.jl")
 using LinearAlgebra
 using StaticArrays
 using .LennardJones
-using Base.Threads
 
-@inline function interTrimerForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,ϵ::Float64,σ::Float64,D::MArray{Tuple{3},Float64,1,3},cellLists::Array{Int16},Ng::Int64,WCAthresh_sq::Float64,NgThreshold::Float64,nonZeroGrids::Array{Array{Int16,1},1},Nfilled::Int64)
+@inline function interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵ,σ,D,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled)
 
 
-    @threads for nn=1:Nfilled
+    for nn=1:Nfilled
 
         kk,ll,mm = nonZeroGrids[nn]
 
@@ -35,7 +34,7 @@ using Base.Threads
                             else
                                 D = pos[celllabel2,:] .- pos[celllabel1,:]
                                 Dmag_sq = dot(D,D)
-                                if Dmag_sq > NgThreshold^2
+                                if Dmag_sq > intrctnThrshld^2
                                     # Skip pairs with separation beyond threshold (technically some may exist despite cell list)
                                 else
                                     if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains && floor(Int8,(celllabel1-1)/Ndomains)!=floor(Int8,(celllabel2-1)/Ndomains)

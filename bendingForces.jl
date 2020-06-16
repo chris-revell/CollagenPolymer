@@ -12,7 +12,7 @@ module BendingForces
 using LinearAlgebra
 using StaticArrays
 
-@inline function bendingForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,Ebend::Float64,AC::Array{Float64,1},AB::Array{Float64,1},D::Array{Float64,1})
+@inline function bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AC,AB,D)
 
     # Loop over all trimers
     for ii=0:Ntrimers-1

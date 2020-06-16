@@ -12,7 +12,7 @@ using StaticArrays
 using Random
 using Distributions
 
-@inline function initialise(pos::MMatrix,Ntrimers::Int64,Ndomains::Int64,domainLength::Float64,boxsize::Float64)
+@inline function initialise(pos,Ntrimers,Ndomains,domainLength,boxsize)
     initialx = zeros(3)
     initialAngle = zeros(2)
 

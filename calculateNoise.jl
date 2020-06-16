@@ -13,7 +13,7 @@ using Distributions
 using LinearAlgebra
 using StaticArrays
 
-@inline function calculateNoise!(W::MMatrix,Ntrimers::Int64,Ndomains::Int64,dt::Float64)
+@inline function calculateNoise!(W,Ntrimers,Ndomains,dt)
 
     # Loop over all trimers
     for ii=1:Ntrimers*Ndomains

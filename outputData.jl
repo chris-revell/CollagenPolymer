@@ -8,12 +8,11 @@
 __precompile__()
 module OutputData
 
-using Printf
 using DelimitedFiles
 using StaticArrays
 using LinearAlgebra
 
-@inline function outputData(pos::MMatrix,outfile::IOStream,t::Float64,tmax::Float64,Ntrimers::Int64,Ndomains::Int64,σ::Float64)
+@inline function outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
 
     writedlm(outfile,pos,", ")
     flush(outfile)

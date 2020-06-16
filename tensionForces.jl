@@ -11,7 +11,7 @@ module TensionForces
 using LinearAlgebra
 using StaticArrays
 
-@inline function tensionForces!(pos::MMatrix,F::MMatrix,Ntrimers::Int64,Ndomains::Int64,k::Float64,re::Float64,dx::Array{Float64,1})
+@inline function tensionForces!(pos,F,Ntrimers,Ndomains,k,re,dx)
 	# Tension forces between trimer domains
 	for ii=0:Ntrimers-1
 		for jj=1:Ndomains-1 #Threads.@threads for jj=1:Ndomains-1

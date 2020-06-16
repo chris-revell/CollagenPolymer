@@ -31,9 +31,9 @@ using .Initialise
 using .CreateRunDirectory
 
 # Define run parameters
-const Ntrimers       = 10                  # Number of collagen trimers
+const Ntrimers       = 5                  # Number of collagen trimers
 const L              = 1.0                # Length of one trimer
-const a              = 0.01               # Diameter of trimer = Diameter of particle within trimer
+const a              = 0.1               # Diameter of trimer = Diameter of particle within trimer
 const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*a)+1.0) # Number of particles per trimer, ensuring re<=0.4σ
 const boxSize        = 1.0                # Dimensions of cube in which particles are initialised
 
@@ -45,9 +45,9 @@ const kT             = 1.0                # Boltzmann constant*Temperature
 const ϵLJ            = 1.0*kT             # External Lennard-Jones energy
 const σ              = a                  # External LJ length scale (separation at which V=0) = 2*particle radius
 const WCAthresh_sq   = (2.0^(1.0/6.0)*σ)^2# Cutoff threshold for WCA potential - separation at which force is zero - squared
-const k              = 1000000.0*kT       # Internal spring stiffness for forces between adjacent particles within a trimer
+const k              = 100000.0*kT       # Internal spring stiffness for forces between adjacent particles within a trimer
 const re             = (L-σ)/(Ndomains-1) # Equilibrium separation of springs connecting adjacent particles within a trimer
-const Ebend          = 1000000.0*kT    # Internal bending modulus of trimer
+const Ebend          = 100000.0*kT    # Internal bending modulus of trimer
 
 # Derived parameters
 const D              = kT/(6.0*π*μ*a)     # Diffusion constant
@@ -55,7 +55,7 @@ const trimerVolume   = L*π*a^2            # Volume of one trimer
 #const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
 # Simulation parameters
-const tmax           = 0.00001              # Total simulation time
+const tmax           = 0.5              # Total simulation time
 const outputInterval = tmax/100.0         # Time interval for writing position data to file
 const renderFlag     = 0                  # Controls whether or not system is visualised with povRay automatically
 const intrctnThrshld = 2.0*σ              # Threshold for van der Waals interactions
@@ -66,12 +66,12 @@ const Ng             = ceil(Int64,boxMultiples*boxSize/intrctnThrshld)+1 #
 const pos            = MMatrix{Ntrimers*Ndomains,3}(zeros(Float64,Ntrimers*Ndomains,3)) # xyz positions of all particles
 const F              = MMatrix{Ntrimers*Ndomains,3}(zeros(Float64,Ndomains*Ntrimers,3)) # xyz dimensions of all forces applied to particles
 const W              = MMatrix{Ntrimers*Ndomains,3}(zeros(Float64,Ndomains*Ntrimers,3)) # xyz values of stochastic Wiener process for all particles
-const cellLists      = zeros(Int16,Ng,Ng,Ng,50)                                 # Cell list grid. Too many components for static array?
+const cellLists      = zeros(Int16,Ng,Ng,Ng,20)                                 # Cell list grid. Too many components for static array?
 const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
 
 
 # Define function for bringing together modules to run simulation
-@inline function runsim(Ntrimers::Int64,Ndomains::Int64,tmax::Float64,outputInterval::Float64,boxSize::Float64,σ::Float64,k::Float64,Ebend::Float64,ϵLJ::Float64,re::Float64,D::Float64,kT::Float64,pos::MMatrix,F::MMatrix,W::MMatrix,renderFlag::Int64,Ng::Int64,cellLists::Array{Int16},intrctnThrshld::Float64,boxMultiples::Int64,WCAthresh_sq::Float64,nonZeroGrids::Array{Array{Int16,1},1})
+@inline function main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 
     # Initialise system time
     t = 0.0
@@ -115,7 +115,7 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
         tensionForces!(pos,F,Ntrimers,Ndomains,k,re,AA)
 
         # Calculate forces from trimer bending stiffness
-        bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
+        #bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
         interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled)
@@ -128,7 +128,7 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
         calculateNoise!(W,Ntrimers,Ndomains,dt)
 
         # Integrate system with forward euler
-        t = updateSystem!(pos,F,W,Ntrimers,Ndomains,t,dt,D,kT)
+        t = updateSystem!(pos,F,W,t,dt,D,kT)
 
         if (t%outputInterval)<dt
             outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
@@ -143,13 +143,13 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
     end
 end
 
-#runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+#main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 
 # using Profile
 #
 # Profile.clear()
-# @profile runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+# @profile main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 # Juno.profiler(; C=true)
 
 #using BenchmarkTools
-#@benchmark runsim(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+#@benchmark main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
