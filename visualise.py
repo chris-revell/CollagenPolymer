@@ -29,8 +29,8 @@ for i in range(int(conditions["tmax"]/conditions["outputInterval"])):
     outfile.write("  sky <0,0,1>           \n")
     outfile.write("  direction <-1,0,0>      \n")
     outfile.write("  right <-4/3,0,0>      \n")
-    outfile.write("  location <0,-5,10> \n" )
-    outfile.write("  look_at <0,0,0>     \n" )
+    outfile.write("  location <0,-3,5> \n" )
+    outfile.write("  look_at <0.25,0.25,0.25>     \n" )
     outfile.write("  angle 15      \n")
     outfile.write("}\n")
     outfile.write("global_settings { ambient_light White }\n")
@@ -41,11 +41,15 @@ for i in range(int(conditions["tmax"]/conditions["outputInterval"])):
     outfile.write("background { color White }\n" )
     subdata = data[i*int(conditions["Ntrimers"])*int(conditions["Ndomains"]):(i+1)*int(conditions["Ntrimers"])*int(conditions["Ndomains"]),:]
     for j in range(int(conditions["Ntrimers"])):
-        outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Blue}}}}}}\n".format(subdata[j*int(conditions["Ndomains"]),0],subdata[j*int(conditions["Ndomains"]),1],subdata[j*int(conditions["Ndomains"]),2],conditions["σ"]/2.0))
-        outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"]),0],subdata[j*int(conditions["Ndomains"]),1],subdata[j*int(conditions["Ndomains"]),2],subdata[j*int(conditions["Ndomains"])+1,0],subdata[j*int(conditions["Ndomains"])+1,1],subdata[j*int(conditions["Ndomains"])+1,2],conditions["σ"]/2.0))
-        for k in range(int(conditions["Ndomains"])-1):
+        for k in range(5):
+            outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Blue}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],conditions["σ"]/2.0))
+            outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Blue}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],subdata[j*int(conditions["Ndomains"])+k+1,0],subdata[j*int(conditions["Ndomains"])+k+1,1],subdata[j*int(conditions["Ndomains"])+k+1,2],conditions["σ"]/2.0))
+        for k in range(5,int(conditions["Ndomains"])-5):
             outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],conditions["σ"]/2.0))
             outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],subdata[j*int(conditions["Ndomains"])+k+1,0],subdata[j*int(conditions["Ndomains"])+k+1,1],subdata[j*int(conditions["Ndomains"])+k+1,2],conditions["σ"]/2.0))
+        for k in range(int(conditions["Ndomains"])-5,int(conditions["Ndomains"])-1):
+            outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Red}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],conditions["σ"]/2.0))
+            outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Red}}}}}}\n".format(subdata[j*int(conditions["Ndomains"])+k,0],subdata[j*int(conditions["Ndomains"])+k,1],subdata[j*int(conditions["Ndomains"])+k,2],subdata[j*int(conditions["Ndomains"])+k+1,0],subdata[j*int(conditions["Ndomains"])+k+1,1],subdata[j*int(conditions["Ndomains"])+k+1,2],conditions["σ"]/2.0))
         outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Red}}}}}}\n".format(subdata[int(conditions["Ndomains"])*(j+1)-1,0],subdata[int(conditions["Ndomains"])*(j+1)-1,1],subdata[int(conditions["Ndomains"])*(j+1)-1,2],conditions["σ"]/2.0))
     #for j in range(int(conditions["Ntrimers"])*int(conditions["Ndomains"])):
     #    outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j,0],subdata[j,1],subdata[j,2],conditions["σ"]/2.0))

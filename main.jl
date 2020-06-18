@@ -30,6 +30,7 @@ using .OutputData
 using .Initialise
 using .CreateRunDirectory
 
+
 # Define run parameters
 const Ntrimers       = 5                  # Number of collagen trimers
 const L              = 1.0                # Length of one trimer
@@ -55,7 +56,7 @@ const trimerVolume   = L*π*a^2            # Volume of one trimer
 #const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
 # Simulation parameters
-const tmax           = 0.5              # Total simulation time
+const tmax           = 1.0              # Total simulation time
 const outputInterval = tmax/100.0         # Time interval for writing position data to file
 const renderFlag     = 0                  # Controls whether or not system is visualised with povRay automatically
 const intrctnThrshld = 2.0*σ              # Threshold for van der Waals interactions
@@ -68,7 +69,6 @@ const F              = MMatrix{Ntrimers*Ndomains,3}(zeros(Float64,Ndomains*Ntrim
 const W              = MMatrix{Ntrimers*Ndomains,3}(zeros(Float64,Ndomains*Ntrimers,3)) # xyz values of stochastic Wiener process for all particles
 const cellLists      = zeros(Int16,Ng,Ng,Ng,20)                                 # Cell list grid. Too many components for static array?
 const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
-
 
 # Define function for bringing together modules to run simulation
 @inline function main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
@@ -115,7 +115,7 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
         tensionForces!(pos,F,Ntrimers,Ndomains,k,re,AA)
 
         # Calculate forces from trimer bending stiffness
-        #bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
+        bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
         interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled)
@@ -143,7 +143,9 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
     end
 end
 
-#main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+
+
+# main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 
 # using Profile
 #
@@ -151,5 +153,5 @@ end
 # @profile main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
 # Juno.profiler(; C=true)
 
-#using BenchmarkTools
-#@benchmark main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+# using BenchmarkTools
+# @benchmark main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids) samples=10 seconds=300
