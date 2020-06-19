@@ -29,16 +29,19 @@ for i in range(int(conditions["tmax"]/conditions["outputInterval"])):
     outfile.write("  sky <0,0,1>           \n")
     outfile.write("  direction <-1,0,0>      \n")
     outfile.write("  right <-4/3,0,0>      \n")
-    outfile.write("  location <0,-3,5> \n" )
-    outfile.write("  look_at <0.25,0.25,0.25>     \n" )
+    outfile.write("  location <{},{},{}> \n".format(float(conditions["boxSize"])*6,float(conditions["boxSize"])*2,float(conditions["boxSize"])*2))
+    outfile.write("  look_at <0.,0.,0.>     \n" )
     outfile.write("  angle 15      \n")
     outfile.write("}\n")
     outfile.write("global_settings { ambient_light White }\n")
     outfile.write("light_source {\n" )
-    outfile.write("  <10,-10,20>   \n")
+    outfile.write("  <{},{},{}>   \n".format(float(conditions["boxSize"])*5,-float(conditions["boxSize"])*2,float(conditions["boxSize"])*2))
     outfile.write("  color White*2 \n")
     outfile.write("}\n")
     outfile.write("background { color White }\n" )
+
+    outfile.write("box{{<{},{},{}>,<{},{},{}> texture {{pigment{{color White filter 0.8}} finish {{phong 1.0}} }} }}".format(float(conditions["boxSize"])/2.0,float(conditions["boxSize"])/2.0,float(conditions["boxSize"])/2.0,-float(conditions["boxSize"])/2.0,-float(conditions["boxSize"])/2.0,-float(conditions["boxSize"])/2.0))
+
     subdata = data[i*int(conditions["Ntrimers"])*int(conditions["Ndomains"]):(i+1)*int(conditions["Ntrimers"])*int(conditions["Ndomains"]),:]
     for j in range(int(conditions["Ntrimers"])):
         for k in range(5):

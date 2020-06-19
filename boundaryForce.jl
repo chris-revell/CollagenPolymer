@@ -11,11 +11,23 @@ module BoundaryForce
 using LinearAlgebra
 using StaticArrays
 
-@inline function boundaryForce!(pos,F,Ntrimers,Ndomains,ϵ,dx)
+@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng)
 
 
 	# Loop over edges of cell lists grid
+	for i in 1:Nfilled
+		if 1 in nonZeroGrids[i] || Ng in nonZeroGrids[i]
+			kk,ll,mm = nonZeroGrids[i]
+			#println(nonZeroGrids[i])
+			for j in cellLists[kk,ll,mm,1]
 
+########################################################################################
+				# Set direction and magnitude of force properly
+				F[j,:] = -10000.0*pos[j,:]
+########################################################################################
+			end
+		end
+	end
 
 end
 
