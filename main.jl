@@ -60,8 +60,8 @@ const tmax           = 1.0              # Total simulation time
 const outputInterval = tmax/100.0         # Time interval for writing position data to file
 const renderFlag     = 0                  # Controls whether or not system is visualised with povRay automatically
 const intrctnThrshld = 2.0*σ              # Threshold for van der Waals interactions
-const boxMultiples   = 4                  # Multiple of boxsizes over which to define cell list grid to allow for system expansion
-const Ng             = ceil(Int64,boxMultiples*boxSize/intrctnThrshld)+1 #
+#const boxMultiples   = 4                  # Multiple of boxsizes over which to define cell list grid to allow for system expansion
+const Ng             = ceil(Int64,boxSize/intrctnThrshld)+1 #
 
 # Data arrays
 const pos            = MMatrix{Ntrimers*Ndomains,3}(zeros(Float64,Ntrimers*Ndomains,3)) # xyz positions of all particles
@@ -71,7 +71,7 @@ const cellLists      = zeros(Int16,Ng,Ng,Ng,20)                                 
 const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
 
 # Define function for bringing together modules to run simulation
-@inline function main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+@inline function main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,WCAthresh_sq,nonZeroGrids)
 
     # Initialise system time
     t = 0.0
@@ -145,13 +145,13 @@ end
 
 
 
-# main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+# main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,WCAthresh_sq,nonZeroGrids)
 
 # using Profile
 #
 # Profile.clear()
-# @profile main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids)
+# @profile main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,WCAthresh_sq,nonZeroGrids)
 # Juno.profiler(; C=true)
 
 # using BenchmarkTools
-# @benchmark main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,boxMultiples,WCAthresh_sq,nonZeroGrids) samples=10 seconds=300
+# @benchmark main(Ntrimers,Ndomains,tmax,outputInterval,boxSize,σ,k,Ebend,ϵLJ,re,D,kT,pos,F,W,renderFlag,Ng,cellLists,intrctnThrshld,WCAthresh_sq,nonZeroGrids) samples=10 seconds=300
