@@ -59,7 +59,7 @@ const Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*σ)+1.0) # Number of particles 
 const WCAthresh_sq   = (2.0^(1.0/6.0)*σ)^2# Cutoff threshold for WCA potential - separation at which force is zero - squared
 const re             = (L-σ)/(Ndomains-1) # Equilibrium separation of springs connecting adjacent particles within a trimer
 const D              = kT/(6.0*π*μ*σ)     # Diffusion constant
-const Ng             = ceil(Int64,boxSize/intrctnThrshld)+1 #
+const Ng             = ceil(Int64,boxSize/intrctnThrshld) #
 #const trimerVolume   = L*π*σ^2            # Volume of one trimer
 #const ϕ              = trimerVolume/(2.0*boxSize)^3 # Volume fraction
 
@@ -122,7 +122,7 @@ const nonZeroGrids   = fill(zeros(Int16,3), Ndomains*Ntrimers)
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
         interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,DD,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled)
 
-        boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng)
+        boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵLJ)
 
         # Adapt timestep to maximum force value
         Fmax_sq = max(sum(F.*F,dims=2)...)

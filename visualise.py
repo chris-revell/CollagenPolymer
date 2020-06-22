@@ -12,7 +12,7 @@ import os
 from sys import argv
 
 
-data           = np.genfromtxt("{}/output.txt".format(argv[1]),delimiter=", ")
+data = np.genfromtxt("{}/output.txt".format(argv[1]),delimiter=", ")
 
 conditions = {}
 with open("{}/conditions.txt".format(argv[1])) as f:

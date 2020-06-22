@@ -8,23 +8,39 @@
 __precompile__()
 module BoundaryForce
 
+include("./lennardJones.jl")
 using LinearAlgebra
 using StaticArrays
+using .LennardJones
 
-@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng)
+@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵ)
 
+	dxMatrix = Matrix(1I, 3, 3)
+	r_m = σ*2.0^(1.0/6.0)
 
 	# Loop over edges of cell lists grid
-	for i in 1:Nfilled
-		if 1 in nonZeroGrids[i] || Ng in nonZeroGrids[i]
-			kk,ll,mm = nonZeroGrids[i]
-			#println(nonZeroGrids[i])
-			for j in cellLists[kk,ll,mm,1]
-
-########################################################################################
-				# Set direction and magnitude of force properly
-				F[j,:] = -10000.0*pos[j,:]
-########################################################################################
+	for ii in 1:Nfilled
+		for jj=1:3
+			if nonZeroGrids[ii][jj]==1
+				for kk in 1:cellLists[nonZeroGrids[ii]...,1]
+					dxmag = (boxSize/2.0 + pos[cellLists[nonZeroGrids[ii]...,1+kk],jj])
+					if dxmag < r_m
+						# Use morse potential approximation of Lennard Jones because it is valid over values less than zero. Approximation from http://www.znaturforsch.com/aa/v58a/s58a0615.pdf
+						Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
+						F[cellLists[nonZeroGrids[ii]...,1+kk],:] .-= (Fmag/dxmag).*dxMatrix[jj,:]
+					end
+				end
+			elseif nonZeroGrids[ii][jj]==Ng
+				for kk in 1:cellLists[nonZeroGrids[ii]...,1]
+					dxmag = (boxSize/2.0 - pos[cellLists[nonZeroGrids[ii]...,1+kk],jj])
+					if dxmag < r_m
+						# Use morse potential approximation of Lennard Jones because it is valid over values less than zero. Approximation from http://www.znaturforsch.com/aa/v58a/s58a0615.pdf
+						Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
+						F[cellLists[nonZeroGrids[ii]...,1+kk],:] .+= (Fmag/dxmag).*dxMatrix[jj,:]
+					end
+				end
+			else
+				#skip
 			end
 		end
 	end
