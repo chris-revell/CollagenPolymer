@@ -13,10 +13,7 @@ using LinearAlgebra
 using StaticArrays
 using .LennardJones
 
-@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵ)
-
-	dxMatrix = Matrix(1I, 3, 3)
-	r_m = σ*2.0^(1.0/6.0)
+@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵ,dxMatrix,r_m)	
 
 	# Loop over edges of cell lists grid
 	for ii in 1:Nfilled
@@ -30,7 +27,8 @@ using .LennardJones
 						F[cellLists[nonZeroGrids[ii]...,1+kk],:] .-= (Fmag/dxmag).*dxMatrix[jj,:]
 					end
 				end
-			elseif nonZeroGrids[ii][jj]==Ng
+			end
+			if nonZeroGrids[ii][jj]==Ng
 				for kk in 1:cellLists[nonZeroGrids[ii]...,1]
 					dxmag = (boxSize/2.0 - pos[cellLists[nonZeroGrids[ii]...,1+kk],jj])
 					if dxmag < r_m
@@ -39,12 +37,9 @@ using .LennardJones
 						F[cellLists[nonZeroGrids[ii]...,1+kk],:] .+= (Fmag/dxmag).*dxMatrix[jj,:]
 					end
 				end
-			else
-				#skip
 			end
 		end
 	end
-
 end
 
 export boundaryForce!
