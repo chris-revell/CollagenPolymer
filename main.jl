@@ -36,21 +36,22 @@ using .CellLists
 
 
 # Define run parameters
-const Ntrimers       = 5                  # Number of collagen trimers
-const L              = 0.5                # Length of one trimer
-const σ              = 0.05               # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
-const ϵLJ_in         = 1.0                # External Lennard-Jones energy
-const k_in           = 100000.0           # Internal spring stiffness for forces between adjacent particles within a trimer
-const Ebend_in       = 0.0                # Internal bending modulus of trimer
-const boxSize        = 1.0                # Dimensions of cube in which particles are initialised
-const tmax           = 0.5                # Total simulation time
-const renderFlag     = 1                  # Controls whether or not system is visualised with povRay automatically
+const Ntrimers       = 5        # Number of collagen trimers
+const L              = 0.5      # Length of one trimer
+const σ              = 0.005    # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
+const ϵLJ_in         = 10.0     # External Lennard-Jones energy
+const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
+const Ebend_in       = 10000.0  # Internal bending modulus of trimer
+const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
+const tmax           = 0.5      # Total simulation time
+const outputFlag     = 1        # Controls whether or not data is printed to file
+const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
 
 #%%
 
 # Define function for bringing together modules to run simulation
-@inline function main(Ntrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tmax::Float64,renderFlag::Int64)
+@inline function main(Ntrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tmax::Float64,outputFlag::Int64,renderFlag::Int64)
 
     # Thermodynamic parameters
     μ              = 1.0                # Fluid viscosity
@@ -90,14 +91,18 @@ const renderFlag     = 1                  # Controls whether or not system is vi
     DD = zeros(Int64,3)
 
     # Setup data folder and output files
-    foldername = createRunDirectory(Ntrimers,L,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,outputInterval,Ng,boxSize)
-    outfile = open("output/$(foldername)/output.txt","w")
+    if outputFlag == 1
+        foldername = createRunDirectory(Ntrimers,L,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,outputInterval,Ng,boxSize)
+        outfile = open("output/$(foldername)/output.txt","w")
+    end
 
     # Initialise trimers within boxSize space
     initialise(pos,Ntrimers,Ndomains,re,boxSize)
 
     # Output initial state
-    outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
+    if outputFlag == 1
+        outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
+    end
 
     #Iterate over time until max system time is reached
     while t<tmax
@@ -126,22 +131,27 @@ const renderFlag     = 1                  # Controls whether or not system is vi
         # Integrate system with forward euler
         t = updateSystem!(pos,F,W,t,dt,D,kT)
 
-        if (t%outputInterval)<dt
+        if (t%outputInterval)<dt && outputFlag == 1
             outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
         end
 
     end
-    close(outfile)
+
+    if outputFlag == 1
+        close(outfile)
+    end
 
     # Render images from output files
-    if renderFlag == 1
+    if outputFlag == 1 && renderFlag == 1
         run(`python3 visualise.py output/$foldername`)
     end
 end
 
 #%%
 
-main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,renderFlag)
+main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
+
+main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,outputFlag,renderFlag)
 
 # using Profile
 #
