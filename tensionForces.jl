@@ -9,7 +9,6 @@ __precompile__()
 module TensionForces
 
 using LinearAlgebra
-using StaticArrays
 
 @inline function tensionForces!(pos,F,Ntrimers,Ndomains,k,re,dx)
 	# Tension forces between trimer domains

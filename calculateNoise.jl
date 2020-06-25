@@ -11,7 +11,6 @@ module CalculateNoise
 using Random
 using Distributions
 using LinearAlgebra
-using StaticArrays
 
 @inline function calculateNoise!(W,Ntrimers,Ndomains,dt)
 

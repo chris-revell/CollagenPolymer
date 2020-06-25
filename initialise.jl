@@ -8,7 +8,6 @@
 __precompile__()
 module Initialise
 
-using StaticArrays
 using Random
 using Distributions
 

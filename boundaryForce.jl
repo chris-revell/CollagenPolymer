@@ -10,10 +10,9 @@ module BoundaryForce
 
 include("./lennardJones.jl")
 using LinearAlgebra
-using StaticArrays
 using .LennardJones
 
-@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵ,dxMatrix,r_m)	
+@inline function boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵ,dxMatrix,r_m)
 
 	# Loop over edges of cell lists grid
 	for ii in 1:Nfilled

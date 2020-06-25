@@ -9,7 +9,6 @@ __precompile__()
 module LennardJones
 
 using LinearAlgebra
-using StaticArrays
 
 @inline function lennardJones!(dx,ϵ,σ)
 

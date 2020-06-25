@@ -10,7 +10,6 @@ __precompile__()
 module BendingForces
 
 using LinearAlgebra
-using StaticArrays
 
 @inline function bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AC,AB,D)
 
@@ -19,9 +18,9 @@ using StaticArrays
         # Loop over all sets of 3 in each trimer chain
         for jj=1:Ndomains-2 #Threads.@threads for jj=1:Ndomains-2
 
-            AC = pos[ii*Ndomains+jj+2,:] .- pos[ii*Ndomains+jj,:]
-            AB = pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]
-            D  = Ebend*(AC/2.0 .- AB)
+            AC .= pos[ii*Ndomains+jj+2,:] .- pos[ii*Ndomains+jj,:]
+            AB .= pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]
+            D  .= Ebend*(AC/2.0 .- AB)
 
             F[ii*Ndomains+jj,:]   .-= D/2.0
             F[ii*Ndomains+jj+1,:] .+= D

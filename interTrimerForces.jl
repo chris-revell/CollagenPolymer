@@ -10,7 +10,6 @@ module InterTrimerForces
 
 include("lennardJones.jl")
 using LinearAlgebra
-using StaticArrays
 using .LennardJones
 
 @inline function interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵ,σ,D,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled)

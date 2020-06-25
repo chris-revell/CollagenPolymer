@@ -9,7 +9,6 @@ __precompile__()
 module OutputData
 
 using DelimitedFiles
-using StaticArrays
 using LinearAlgebra
 
 @inline function outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)

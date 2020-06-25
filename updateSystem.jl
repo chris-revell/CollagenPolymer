@@ -9,7 +9,6 @@ __precompile__()
 module UpdateSystem
 
 using LinearAlgebra
-using StaticArrays
 
 @inline function updateSystem!(pos,F,W,t,dt,D,kT)
 

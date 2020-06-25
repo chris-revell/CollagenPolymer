@@ -10,7 +10,6 @@
 
 # Import Julia packages
 using Distributions
-using StaticArrays
 using LinearAlgebra
 # Import program modules
 include("./outputData.jl")
