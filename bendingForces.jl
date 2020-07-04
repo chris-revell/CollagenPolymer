@@ -6,25 +6,25 @@
 #
 #
 
-__precompile__()
 module BendingForces
 
 using LinearAlgebra
+using .Threads
 
 @inline function bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AC,AB,D)
 
-    # Loop over all trimers
-    for ii=0:Ntrimers-1
-        # Loop over all sets of 3 in each trimer chain
-        for jj=1:Ndomains-2 #Threads.@threads for jj=1:Ndomains-2
+    @threads for jj=1:Ndomains*Ntrimers
 
-            AC .= pos[ii*Ndomains+jj+2,:] .- pos[ii*Ndomains+jj,:]
-            AB .= pos[ii*Ndomains+jj+1,:] .- pos[ii*Ndomains+jj,:]
-            D  .= Ebend*(AC/2.0 .- AB)
+        if (jj+2)%Ndomains == 0
+            #skip
+        else
+            AC[:,threadid()] = pos[jj+2,:] - pos[jj,:]
+            AB[:,threadid()] = pos[jj+1,:] - pos[jj,:]
+            D[:,threadid()]  = Ebend*(AC[:,threadid()]/2.0 - AB[:,threadid()])
 
-            F[ii*Ndomains+jj,:]   .-= D/2.0
-            F[ii*Ndomains+jj+1,:] .+= D
-            F[ii*Ndomains+jj+2,:] .-= D/2.0
+            F[ii*Ndomains+jj,:,threadid()]   -= D[:,threadid()]./2.0
+            F[ii*Ndomains+jj+1,:,threadid()] += D[:,threadid()]
+            F[ii*Ndomains+jj+2,:,threadid()] -= D[:,threadid()]./2.0
         end
     end
 end

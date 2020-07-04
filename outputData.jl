@@ -5,7 +5,7 @@
 #  Created by Christopher Revell on 30/03/2020.
 #
 #
-__precompile__()
+
 module OutputData
 
 using DelimitedFiles

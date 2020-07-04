@@ -11,38 +11,37 @@
 # Import Julia packages
 using Distributions
 using LinearAlgebra
+using .Threads
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
 include("./updateSystem.jl")
-include("./tensionForces.jl")
+include("./internalForces.jl")
 include("./interTrimerForces.jl")
-include("./bendingForces.jl")
 include("./initialise.jl")
 include("./createRunDirectory.jl")
-include("./boundaryForce.jl")
+#include("./boundaryForce.jl")
 include("./cellLists.jl")
-using .TensionForces
-using .BendingForces
+using .InternalForces
 using .InterTrimerForces
 using .CalculateNoise
 using .UpdateSystem
 using .OutputData
 using .Initialise
 using .CreateRunDirectory
-using .BoundaryForce
+#using .BoundaryForce
 using .CellLists
 
 
 # Define run parameters
 const Ntrimers       = 5        # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
-const σ              = 0.005    # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
+const σ              = 0.0025    # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
 const ϵLJ_in         = 10.0     # External Lennard-Jones energy
 const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
 const Ebend_in       = 10000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.5      # Total simulation time
+const tmax           = 0.000001      # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
@@ -74,9 +73,10 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
 
     # Data arrays
     pos            = zeros(Float64,Ntrimers*Ndomains,3)     # xyz positions of all particles
-    F              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz dimensions of all forces applied to particles
+    F              = zeros(Float64,Ndomains*Ntrimers,3,nthreads())     # xyz dimensions of all forces applied to particles
+    Fmags          = zeros(Float64,Ndomains*Ntrimers)
     W              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz values of stochastic Wiener process for all particles
-    cellLists      = zeros(Int64,Ng,Ng,Ng,10)               # Cell list grid
+    cellLists      = zeros(Int64,Ng,Ng,Ng,20)               # Cell list grid
     nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
     Nfilled        = 0                                      # Number of non-empty grid points in cellLists
     dxMatrix       = Matrix(1I, 3, 3)                       # Identity matrix
@@ -86,7 +86,9 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     dt = 0.0
 
     # Allocate variables to reuse in calculations and prevent memory reallocations
-    AA,BB,CC = fill(zeros(Float64,3),3)
+    AA = zeros(Float64,3,nthreads())
+    BB = zeros(Float64,3,nthreads())
+    CC = zeros(Float64,3,nthreads())
     DD = zeros(Int64,3)
 
     # Setup data folder and output files
@@ -109,19 +111,19 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         # Create cell lists array for interactions
         Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,DD,boxSize,intrctnThrshld)
 
-        # Spring forces between particles along trimer chain
-        tensionForces!(pos,F,Ntrimers,Ndomains,k,re,AA)
-
-        # Calculate forces from trimer bending stiffness
-        bendingForces!(pos,F,Ntrimers,Ndomains,Ebend,AA,BB,CC)
+        internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,AA,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled)
+        interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,AA,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled,boxSize,dxMatrix,r_m)
 
-        boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵLJ,dxMatrix,r_m)
+        #boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵLJ,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
-        Fmax_sq = max(sum(F.*F,dims=2)...)
+        F[:,:,1] = sum(F,dims=3)
+        @threads for i=1:Ndomains*Ntrimers
+            Fmags[i] = sum(F[i,:,1].*F[i,:,1])
+        end
+        Fmax_sq = maximum(Fmags)
         dt = min(σ^2/(32*D),kT*σ/(2.0*D*sqrt(Fmax_sq)))
 
         # Find stochastic term (Wiener process) for all monomers
@@ -150,7 +152,8 @@ end
 
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
 
-main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,outputFlag,renderFlag)
+using BenchmarkTools
+@btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
 
 # using Profile
 #

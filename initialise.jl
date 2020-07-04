@@ -5,7 +5,7 @@
 #  Created by Christopher Revell on 01/05/2020.
 #
 #
-__precompile__()
+
 module Initialise
 
 using Random

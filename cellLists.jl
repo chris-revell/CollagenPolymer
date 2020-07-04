@@ -5,7 +5,7 @@
 #  Created by Christopher Revell on 23/06/2020.
 #
 #
-__precompile__()
+
 module CellLists
 
 using LinearAlgebra
@@ -15,9 +15,8 @@ using LinearAlgebra
 	# Create cell list to identify trimer pairs within interaction range
 	cellLists[:,:,:,1] .= 0
 	Nfilled = 0
-	#fill!(nonZeroGrids,zeros(Int64,3))
 	for jj=1:allDomains
-		iₓ = ceil.(Int64,(pos[jj,:] .+ boxSize/2.0)./intrctnThrshld)
+		iₓ = ceil.(Int64,(pos[jj,:] .+ boxSize/2.0)/intrctnThrshld)
 		cellLists[iₓ...,1] += 1
 		cellLists[iₓ...,cellLists[iₓ...,1]+1] = jj
 		if iₓ in nonZeroGrids[1:Nfilled]
