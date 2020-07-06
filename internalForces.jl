@@ -13,12 +13,14 @@ using .Threads
 
 @inline function internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
 
+	# Loop over all particles
 	@threads for jj=1:Ndomains*Ntrimers
 
 		# Tension forces between trimer domains
 		if jj%Ndomains == 0
-			#skip
+			# Skip at the end of each trimer
 		else
+			# Calculate tension forces between adjacent particles with Hookean spring potential
 			AA[:,threadid()] = pos[jj+1,:] .- pos[jj,:]
 		    AA_mag = sqrt(dot(AA[:,threadid()],AA[:,threadid()]))
 		    dif = AA_mag - re
@@ -27,8 +29,9 @@ using .Threads
 
 			# Bending forces
 			if (jj+1)%Ndomains == 0
-				#skip
+				# Skip at the end of each trimer
 			else
+				# Bending force from small displacement potential
 				BB[:,threadid()] = pos[jj+2,:] .- pos[jj+1,:]
 				CC[:,threadid()] = Ebend*(BB[:,threadid()]/2.0 .- AA[:,threadid()])
 				F[jj,:,threadid()]   -= CC[:,threadid()]./2.0

@@ -33,14 +33,14 @@ using .CellLists
 
 
 # Define run parameters
-const Ntrimers       = 10       # Number of collagen trimers
+const Ntrimers       = 5        # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
 const σ              = 0.0025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
 const ϵLJ_in         = 10.0     # External Lennard-Jones energy
 const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
 const Ebend_in       = 10000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.00003  # Total simulation time
+const tmax           = 0.00001  # Total simulation time  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
@@ -81,7 +81,8 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     dxMatrix       = Matrix(1I, 3, 3)                              # Identity matrix for later calculations
 
     # Initialise system time
-    t = 0.0
+    t  = 0.0
+    dt = 0.0
 
     # Allocate variables to reuse in calculations and prevent memory reallocations
     AA = zeros(Float64,3,nthreads())
@@ -148,9 +149,11 @@ end
 
 #%%
 
+# Quick run to precompile
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
 
 using BenchmarkTools
+println("Timing")
 @btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
 
 # using Profile
