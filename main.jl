@@ -12,7 +12,6 @@
 using Distributions
 using LinearAlgebra
 using Random
-using .Threads
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
@@ -72,7 +71,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
 
     # Data arrays
     pos            = zeros(Float64,Ntrimers*Ndomains,3)            # xyz positions of all particles
-    F              = zeros(Float64,Ndomains*Ntrimers,3,nthreads()) # xyz dimensions of all forces applied to particles
+    F              = zeros(Float64,Ndomains*Ntrimers,3) # xyz dimensions of all forces applied to particles
     Fmags          = zeros(Float64,Ndomains*Ntrimers)              # Vector of force magnitudes for all particules
     W              = zeros(Float64,Ndomains*Ntrimers,3)            # xyz values of stochastic Wiener process for all particles
     cellLists      = zeros(Int64,Ng,Ng,Ng,20)                      # Cell list grid
@@ -82,18 +81,16 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
 
     # Initialise system time
     t = 0.0
+    dt = 0.0
 
     # Allocate variables to reuse in calculations and prevent memory reallocations
-    AA = zeros(Float64,3,nthreads())
-    BB = zeros(Float64,3,nthreads())
-    CC = zeros(Float64,3,nthreads())
+    AA = zeros(Float64,3)
+    BB = zeros(Float64,3)
+    CC = zeros(Float64,3)
     DD = zeros(Int64,3)
 
-    # Create random number generators for each thread
-    ThreadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
-    for i in 1:nthreads()
-        ThreadRNG[i] = Random.MersenneTwister()
-    end
+    # Create random number generators
+    RNG = Random.MersenneTwister()
 
     # Initialise trimers within boxSize space
     initialise(pos,Ntrimers,Ndomains,re,boxSize)
@@ -111,21 +108,21 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         # Create cell lists array for interactions
         Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,DD,boxSize,intrctnThrshld)
 
+        # Calculate tension and bending forces within each trimer
         internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
         interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,AA,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled,boxSize,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
-        F[:,:,1] = sum(F,dims=3)
-        @threads for i=1:Ndomains*Ntrimers
-            Fmags[i] = sum(F[i,:,1].*F[i,:,1])
+        for i=1:Ndomains*Ntrimers
+            Fmags[i] = sum(F[i,:].*F[i,:])
         end
         Fmax_sq = maximum(Fmags)
         dt = min(σ^2/(32*D),kT*σ/(2.0*D*sqrt(Fmax_sq)))
 
         # Find stochastic term (Wiener process) for all monomers
-        calculateNoise!(W,Ntrimers,Ndomains,dt,ThreadRNG)
+        calculateNoise!(W,Ntrimers,Ndomains,dt,RNG)
 
         # Integrate system with forward euler
         t = updateSystem!(pos,F,W,t,dt,D,kT)
