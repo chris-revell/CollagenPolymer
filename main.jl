@@ -11,6 +11,7 @@
 # Import Julia packages
 using Distributions
 using LinearAlgebra
+using Random
 using .Threads
 # Import program modules
 include("./outputData.jl")
@@ -41,7 +42,7 @@ const ϵLJ_in         = 10.0     # External Lennard-Jones energy
 const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
 const Ebend_in       = 10000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.000001      # Total simulation time
+const tmax           = 0.00003      # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
@@ -91,6 +92,12 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     CC = zeros(Float64,3,nthreads())
     DD = zeros(Int64,3)
 
+    ThreadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
+    for i in 1:nthreads()
+        ThreadRNG[i] = Random.MersenneTwister()
+    end
+
+
     # Setup data folder and output files
     if outputFlag == 1
         foldername = createRunDirectory(Ntrimers,L,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,outputInterval,Ng,boxSize)
@@ -116,8 +123,6 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
         interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,AA,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled,boxSize,dxMatrix,r_m)
 
-        #boundaryForce!(pos,F,cellLists,nonZeroGrids,Nfilled,Ng,boxSize,σ,ϵLJ,dxMatrix,r_m)
-
         # Adapt timestep to maximum force value
         F[:,:,1] = sum(F,dims=3)
         @threads for i=1:Ndomains*Ntrimers
@@ -127,7 +132,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         dt = min(σ^2/(32*D),kT*σ/(2.0*D*sqrt(Fmax_sq)))
 
         # Find stochastic term (Wiener process) for all monomers
-        calculateNoise!(W,Ntrimers,Ndomains,dt)
+        calculateNoise!(W,Ntrimers,Ndomains,dt,ThreadRNG)
 
         # Integrate system with forward euler
         t = updateSystem!(pos,F,W,t,dt,D,kT)

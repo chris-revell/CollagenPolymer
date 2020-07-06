@@ -19,7 +19,7 @@ using .Threads
 		if jj%Ndomains == 0
 			#skip
 		else
-		    AA[:,threadid()] = pos[jj+1,:] .- pos[jj,:]
+			AA[:,threadid()] = pos[jj+1,:] .- pos[jj,:]
 		    AA_mag = sqrt(dot(AA[:,threadid()],AA[:,threadid()]))
 		    dif = AA_mag - re
 		    F[jj,:,threadid()]   += dif*k.*AA[:,threadid()]./AA_mag
@@ -29,10 +29,8 @@ using .Threads
 			if (jj+1)%Ndomains == 0
 				#skip
 			else
-				AA[:,threadid()] = pos[jj+2,:] .- pos[jj,:]
-				BB[:,threadid()] = pos[jj+1,:] .- pos[jj,:]
-				CC[:,threadid()] = Ebend*(AA[:,threadid()]/2.0 .- BB[:,threadid()])
-
+				BB[:,threadid()] = pos[jj+2,:] .- pos[jj+1,:]
+				CC[:,threadid()] = Ebend*(BB[:,threadid()]/2.0 .- AA[:,threadid()])
 				F[jj,:,threadid()]   -= CC[:,threadid()]./2.0
 				F[jj+1,:,threadid()] += CC[:,threadid()]
 				F[jj+2,:,threadid()] -= CC[:,threadid()]./2.0
