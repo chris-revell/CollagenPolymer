@@ -21,7 +21,6 @@ include("./internalForces.jl")
 include("./interTrimerForces.jl")
 include("./initialise.jl")
 include("./createRunDirectory.jl")
-#include("./boundaryForce.jl")
 include("./cellLists.jl")
 using .InternalForces
 using .InterTrimerForces
@@ -30,19 +29,18 @@ using .UpdateSystem
 using .OutputData
 using .Initialise
 using .CreateRunDirectory
-#using .BoundaryForce
 using .CellLists
 
 
 # Define run parameters
-const Ntrimers       = 5        # Number of collagen trimers
+const Ntrimers       = 10       # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
-const σ              = 0.0025    # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
+const σ              = 0.0025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
 const ϵLJ_in         = 10.0     # External Lennard-Jones energy
 const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
 const Ebend_in       = 10000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.00003      # Total simulation time
+const tmax           = 0.00003  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
@@ -53,13 +51,13 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
 @inline function main(Ntrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tmax::Float64,outputFlag::Int64,renderFlag::Int64)
 
     # Thermodynamic parameters
-    μ              = 1.0                # Fluid viscosity
-    kT             = 1.0                # Boltzmann constant*Temperature
+    μ              = 1.0                               # Fluid viscosity
+    kT             = 1.0                               # Boltzmann constant*Temperature
 
     # Force parameters
-    ϵLJ            = ϵLJ_in*kT          # External Lennard-Jones energy
-    k              = k_in*kT            # Internal spring stiffness for forces between adjacent particles within a trimer
-    Ebend          = Ebend_in*kT        # Internal bending modulus of trimer
+    ϵLJ            = ϵLJ_in*kT                         # External Lennard-Jones energy
+    k              = k_in*kT                           # Internal spring stiffness for forces between adjacent particles within a trimer
+    Ebend          = Ebend_in*kT                       # Internal bending modulus of trimer
 
     # Derived parameters
     outputInterval = tmax/100.0                        # Time interval for writing position data to file
@@ -73,18 +71,17 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     Ng             = ceil(Int64,boxSize/intrctnThrshld)# Dimensions of cellLists array
 
     # Data arrays
-    pos            = zeros(Float64,Ntrimers*Ndomains,3)     # xyz positions of all particles
-    F              = zeros(Float64,Ndomains*Ntrimers,3,nthreads())     # xyz dimensions of all forces applied to particles
-    Fmags          = zeros(Float64,Ndomains*Ntrimers)
-    W              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz values of stochastic Wiener process for all particles
-    cellLists      = zeros(Int64,Ng,Ng,Ng,20)               # Cell list grid
-    nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
-    Nfilled        = 0                                      # Number of non-empty grid points in cellLists
-    dxMatrix       = Matrix(1I, 3, 3)                       # Identity matrix
+    pos            = zeros(Float64,Ntrimers*Ndomains,3)            # xyz positions of all particles
+    F              = zeros(Float64,Ndomains*Ntrimers,3,nthreads()) # xyz dimensions of all forces applied to particles
+    Fmags          = zeros(Float64,Ndomains*Ntrimers)              # Vector of force magnitudes for all particules
+    W              = zeros(Float64,Ndomains*Ntrimers,3)            # xyz values of stochastic Wiener process for all particles
+    cellLists      = zeros(Int64,Ng,Ng,Ng,20)                      # Cell list grid
+    nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)       # Stores locations of non-empty grid points in cellLists
+    Nfilled        = 0                                             # Number of non-empty grid points in cellLists
+    dxMatrix       = Matrix(1I, 3, 3)                              # Identity matrix for later calculations
 
     # Initialise system time
     t = 0.0
-    dt = 0.0
 
     # Allocate variables to reuse in calculations and prevent memory reallocations
     AA = zeros(Float64,3,nthreads())
@@ -92,23 +89,19 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     CC = zeros(Float64,3,nthreads())
     DD = zeros(Int64,3)
 
+    # Create random number generators for each thread
     ThreadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
     for i in 1:nthreads()
         ThreadRNG[i] = Random.MersenneTwister()
     end
 
-
-    # Setup data folder and output files
-    if outputFlag == 1
-        foldername = createRunDirectory(Ntrimers,L,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,outputInterval,Ng,boxSize)
-        outfile = open("output/$(foldername)/output.txt","w")
-    end
-
     # Initialise trimers within boxSize space
     initialise(pos,Ntrimers,Ndomains,re,boxSize)
 
-    # Output initial state
+    # Setup data folder and output files; output initial state
     if outputFlag == 1
+        foldername = createRunDirectory(Ntrimers,L,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,outputInterval,Ng,boxSize)
+        outfile = open("output/$(foldername)/output.txt","w")
         outputData(pos,outfile,t,tmax,Ntrimers,Ndomains,σ)
     end
 
