@@ -21,18 +21,18 @@ using LinearAlgebra
 			AA = pos[jj+1,:] .- pos[jj,:]
 		    AA_mag = sqrt(dot(AA,AA))
 		    dif = AA_mag - re
-		    F[jj,:]   += dif*k.*AA./AA_mag
-		    F[jj+1,:] -= dif*k.*AA./AA_mag
+		    F[jj,:]   .+= (dif*k/AA_mag).*AA
+		    F[jj+1,:] .-= (dif*k/AA_mag).*AA
 
 			# Bending forces
 			if (jj+1)%Ndomains == 0
 				#skip
 			else
 				BB = pos[jj+2,:] .- pos[jj+1,:]
-				CC = Ebend*(BB/2.0 .- AA)
-				F[jj,:]   -= CC./2.0
-				F[jj+1,:] += CC
-				F[jj+2,:] -= CC./2.0
+				CC = Ebend.*(BB./2.0 .- AA)
+				F[jj,:]   .-= CC./2.0
+				F[jj+1,:] .+= CC
+				F[jj+2,:] .-= CC./2.0
 			end
 		end
 	end

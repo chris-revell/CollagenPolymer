@@ -45,13 +45,13 @@ using .LennardJones
                                                 if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains && floor(Int8,(celllabel1-1)/Ndomains)!=floor(Int8,(celllabel2-1)/Ndomains)
                                                     # Apply adhesive van der waals force in stepped fashion between trimers
                                                     lennardJones!(dx,ϵ,σ)
-                                                    F[celllabel1,:] += dx
-                                                    F[celllabel2,:] -= dx
+                                                    F[celllabel1,:] .+= dx
+                                                    F[celllabel2,:] .-= dx
                                                 elseif dxmag_sq < WCAthresh_sq
                                                     # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
                                                     lennardJones!(dx,ϵ,σ)
-                                                    F[celllabel1,:] += dx
-                                                    F[celllabel2,:] -= dx
+                                                    F[celllabel1,:] .+= dx
+                                                    F[celllabel2,:] .-= dx
                                                 else
                                                     # Skip any pairs within interaction range, beyond WCA range, and without specified adhesive rule
                                                 end
@@ -75,7 +75,7 @@ using .LennardJones
 					if dxmag < r_m
 						# Use morse potential approximation of Lennard Jones because it is valid over values less than zero. Approximation from http://www.znaturforsch.com/aa/v58a/s58a0615.pdf
 						Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
-						F[cellLists[nonZeroGrids[nn]...,1+kk],:] -= (Fmag/dxmag).*dxMatrix[jj,:]
+						F[cellLists[nonZeroGrids[nn]...,1+kk],:] .-= (Fmag/dxmag).*dxMatrix[jj,:]
 					end
 				end
 			end
@@ -85,7 +85,7 @@ using .LennardJones
 					if dxmag < r_m
 						# Use morse potential approximation of Lennard Jones because it is valid over values less than zero. Approximation from http://www.znaturforsch.com/aa/v58a/s58a0615.pdf
 						Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
-						F[cellLists[nonZeroGrids[nn]...,1+kk],:] += (Fmag/dxmag).*dxMatrix[jj,:]
+						F[cellLists[nonZeroGrids[nn]...,1+kk],:] .+= (Fmag/dxmag).*dxMatrix[jj,:]
 					end
 				end
 			end

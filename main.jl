@@ -146,15 +146,16 @@ end
 
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
 
+#main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,1,1)
+
 using BenchmarkTools
 println("Timing")
 @btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
 
-# using Profile
-#
-# Profile.clear()
-# @profile main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,renderFlag)
-# Juno.profiler(; C=true)
+#using Profile
+#Profile.clear()
+#@profile main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
+#Juno.profiler(; C=true)
 
 # using BenchmarkTools
 # @benchmark main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,renderFlag)

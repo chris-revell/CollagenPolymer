@@ -32,7 +32,7 @@ using Distributions
         end
 
         for jj=1:Ndomains
-            pos[ii*Ndomains+jj,:] = initialx .+ (jj-1)*domainLength.*dx
+            pos[ii*Ndomains+jj,:] .= initialx .+ (jj-1)*domainLength.*dx
         end
     end
 end
