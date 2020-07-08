@@ -10,7 +10,7 @@ module CellLists
 
 using LinearAlgebra
 
-@inline function cellLists!(pos,allDomains,cellLists,nonZeroGrids,cellIndex,boxSize,intrctnThrshld)
+@inline function cellLists!(pos,allDomains,cellLists,nonZeroGrids,boxSize,intrctnThrshld)
 
 	# Create cell list to identify trimer pairs within interaction range
 	# Refresh numbers of trimers in each grid point to zero

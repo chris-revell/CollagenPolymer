@@ -90,7 +90,7 @@ const renderFlag     = 0        # Controls whether or not system is visualised w
     AA = zeros(Float64,3,nthreads())
     BB = zeros(Float64,3,nthreads())
     CC = zeros(Float64,3,nthreads())
-    DD = zeros(Int64,3)
+    #DD = zeros(Int64,3)
 
     # Create random number generators for each thread
     ThreadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
@@ -112,7 +112,7 @@ const renderFlag     = 0        # Controls whether or not system is visualised w
     while t<tmax
 
         # Create cell lists array for interactions
-        Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,DD,boxSize,intrctnThrshld)
+        Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,boxSize,intrctnThrshld)
 
         internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
 
