@@ -13,7 +13,7 @@ using .Threads
 
 @inline function adaptTimestep!(F,Fmags,Ntrimers,Ndomains,σ,D,kT)
 
-    F[:,:,1] .= sum(F,dims=3)
+    F[:,:,1] = sum(F,dims=3)
     @threads for i=1:Ndomains*Ntrimers
         Fmags[i] = sum(F[i,:,1].*F[i,:,1])
     end

@@ -35,14 +35,14 @@ using .AdaptTimestep
 
 
 # Define run parameters
-const Ntrimers       = 10        # Number of collagen trimers
+const Ntrimers       = 5        # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
 const σ              = 0.0025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
 const ϵLJ_in         = 100.0     # External Lennard-Jones energy
 const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
 const Ebend_in       = 10000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.001  # Total simulation time  # Total simulation time
+const tmax           = 0.00001  # Total simulation time  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 0        # Controls whether or not system is visualised with povRay automatically
 
