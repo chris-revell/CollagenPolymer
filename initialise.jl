@@ -13,7 +13,7 @@ using Distributions
 
 @inline function initialise(pos,Ntrimers,Ndomains,domainLength,boxSize)
 
-    # Arrays to prevent reallocation 
+    # Arrays to prevent reallocation
     initialx = zeros(3)
     initialAngle = zeros(2)
     dx = zeros(3)
@@ -35,9 +35,10 @@ using Distributions
         end
         # Once position and orientation is found, initialise all particles within trimer
         for jj=1:Ndomains
-            pos[ii*Ndomains+jj,:] = initialx .+ (jj-1)*domainLength.*dx
+            pos[ii*Ndomains+jj,:] .= initialx .+ (jj-1)*domainLength.*dx
         end
     end
+    return nothing
 end
 
 export initialise

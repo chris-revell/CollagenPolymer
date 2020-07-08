@@ -22,6 +22,7 @@ include("./interTrimerForces.jl")
 include("./initialise.jl")
 include("./createRunDirectory.jl")
 include("./cellLists.jl")
+include("./adaptTimestep.jl")
 using .InternalForces
 using .InterTrimerForces
 using .CalculateNoise
@@ -30,19 +31,20 @@ using .OutputData
 using .Initialise
 using .CreateRunDirectory
 using .CellLists
+using .AdaptTimestep
 
 
 # Define run parameters
-const Ntrimers       = 5        # Number of collagen trimers
+const Ntrimers       = 10        # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
 const σ              = 0.0025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
-const ϵLJ_in         = 10.0     # External Lennard-Jones energy
+const ϵLJ_in         = 100.0     # External Lennard-Jones energy
 const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
 const Ebend_in       = 10000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.00001  # Total simulation time  # Total simulation time
+const tmax           = 0.001  # Total simulation time  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
-const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
+const renderFlag     = 0        # Controls whether or not system is visualised with povRay automatically
 
 
 #%%
@@ -118,12 +120,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,AA,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled,boxSize,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
-        F[:,:,1] = sum(F,dims=3)
-        @threads for i=1:Ndomains*Ntrimers
-            Fmags[i] = sum(F[i,:,1].*F[i,:,1])
-        end
-        Fmax_sq = maximum(Fmags)
-        dt = min(σ^2/(32*D),kT*σ/(2.0*D*sqrt(Fmax_sq)))
+        dt = adaptTimestep!(F,Fmags,Ntrimers,Ndomains,σ,D,kT)
 
         # Find stochastic term (Wiener process) for all monomers
         calculateNoise!(W,Ntrimers,Ndomains,dt,ThreadRNG)
