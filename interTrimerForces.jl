@@ -37,7 +37,7 @@ using .LennardJones
                                         if floor(Int8,(celllabel1-1)/Ndomains)==floor(Int8,(celllabel2-1)/Ndomains) && abs(celllabel1-celllabel2)<=1
                                             # Skip adjacent particles in same trimer
                                         else
-                                            dx = pos[celllabel2,:] - pos[celllabel1,:]
+                                            dx .= pos[celllabel2,:] - pos[celllabel1,:]
                                             dxmag_sq = dot(dx,dx)
                                             if dxmag_sq > intrctnThrshld^2
                                                 # Skip pairs with separation beyond threshold (technically some may exist despite cell list)

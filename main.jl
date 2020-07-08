@@ -12,7 +12,6 @@
 using Distributions
 using LinearAlgebra
 using Random
-using .Threads
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
@@ -39,8 +38,8 @@ const Ntrimers       = 5       # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
 const σ              = 0.0025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
 const ϵLJ_in         = 10.0     # External Lennard-Jones energy
-const k_in           = 10000.0  # Internal spring stiffness for forces between adjacent particles within a trimer
-const Ebend_in       = 10000.0  # Internal bending modulus of trimer
+const k_in           = 100000000.0  # Internal spring stiffness for Fraenkel spring forces between adjacent particles within a trimer
+const Ebend_in       = 1000000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
 const tmax           = 0.00001  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
@@ -109,7 +108,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     while t<tmax
 
         # Create cell lists array for interactions
-        Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,DD,boxSize,intrctnThrshld)
+        Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,boxSize,intrctnThrshld)
 
         # Calculate tension and bending forces within each trimer
         internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
@@ -146,11 +145,11 @@ end
 
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
 
-#main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,1,1)
+main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,1,1)
 
-using BenchmarkTools
-println("Timing")
-@btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
+#using BenchmarkTools
+#println("Timing")
+#@btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
 
 #using Profile
 #Profile.clear()

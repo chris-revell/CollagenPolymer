@@ -9,7 +9,6 @@
 module AdaptTimestep
 
 using LinearAlgebra
-using .Threads
 
 @inline function adaptTimestep(F,Fmags,Ntrimers,Ndomains,σ,D,kT)
 
