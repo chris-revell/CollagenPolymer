@@ -41,7 +41,7 @@ const ϵLJ_in         = 10.0     # External Lennard-Jones energy
 const k_in           = 100000000.0  # Internal spring stiffness for Fraenkel spring forces between adjacent particles within a trimer
 const Ebend_in       = 1000000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.00001  # Total simulation time
+const tmax           = 0.000001  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
@@ -144,8 +144,9 @@ end
 #%%
 
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
-
-main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,1,1)
+println("timing")
+using BenchmarkTools
+@btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
 
 #using BenchmarkTools
 #println("Timing")
