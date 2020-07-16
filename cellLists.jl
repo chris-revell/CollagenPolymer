@@ -9,7 +9,7 @@
 module CellLists
 
 using LinearAlgebra
-using DataStructures
+using Dictionaries
 
 @inline function cellLists(nonEmptyGridPoints,pos,allDomains,halfBoxSize,intrctnThrshld)
 
@@ -19,10 +19,10 @@ using DataStructures
 		# Find grid point that particle sits within
 		cellIndex = ceil.(Int64,(pos[jj,:] .+ halfBoxSize)/intrctnThrshld)
 		# Update cell list with this particle
-		push!(nonEmptyGridPoints[cellIndex],jj)
+		push!(get!(nonEmptyGridPoints,cellIndex,Vector{Int64}()),jj)
 	end
 	# Return the number of grid points that contain particles
-	return nonEmptyGridPoints
+	return nothing
 
 end
 

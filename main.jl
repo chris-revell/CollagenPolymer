@@ -12,7 +12,7 @@
 using Distributions
 using LinearAlgebra
 using Random
-using DataStructures
+using Dictionaries
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
@@ -81,7 +81,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     #nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
     #Nfilled        = 0                                      # Number of non-empty grid points in cellLists
     dxMatrix       = Matrix(1I, 3, 3)                       # Identity matrix for later calculations
-    nonEmptyGridPoints = DefaultDict{Vector{Int64}, Vector{Int64}}(Vector{Int64})
+    nonEmptyGridPoints = Dictionary{Vector{Int64}, Vector{Int64}}()
     # Initialise system time
     t = 0.0
     dt = 0.0

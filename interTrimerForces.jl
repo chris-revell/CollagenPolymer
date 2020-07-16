@@ -10,21 +10,22 @@ module InterTrimerForces
 
 include("lennardJones.jl")
 using LinearAlgebra
-using DataStructures
+using Dictionaries
 using .LennardJones
 
 @inline function interTrimerForces!(nonEmptyGridPoints,pos,F,Ndomains,ϵ,σ,dx,Ng,WCAthresh_sq,intrctnThrshld,boxSize,dxMatrix,r_m)
 
 	nextindex = zeros(Int64,3)
+	allKeys = keys(nonEmptyGridPoints)
 
-    for (index,list) in nonEmptyGridPoints
-
+    for index in allKeys
+		list = nonEmptyGridPoints[index]
         for ii in list
             for xx=-1:1
                 for yy=-1:1
                     for zz=-1:1
-						#if haskey(nonEmptyGridPoints,index.+[xx,yy,zz])
-							nextindex = index+[xx,yy,zz]
+						nextindex = index+[xx,yy,zz]
+						if nextindex in allKeys
 	                        for jj in nonEmptyGridPoints[nextindex]
 	                            if floor(Int8,(ii-1)/Ndomains)==floor(Int8,(jj-1)/Ndomains) && abs(ii-jj)<=1
 	                                # Skip adjacent particles in same trimer
@@ -50,9 +51,9 @@ using .LennardJones
 	                                end
 	                            end
 	                        end
-						#else
+						else
 							# skip
-						#end
+						end
                     end
                 end
             end
