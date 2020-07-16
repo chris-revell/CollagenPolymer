@@ -10,57 +10,49 @@ module InterTrimerForces
 
 include("lennardJones.jl")
 using LinearAlgebra
+using DataStructures
 using .LennardJones
 
-@inline function interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵ,σ,dx,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled,boxSize,dxMatrix,r_m)
+@inline function interTrimerForces!(nonEmptyGridPoints,pos,F,Ndomains,ϵ,σ,dx,Ng,WCAthresh_sq,intrctnThrshld,boxSize,dxMatrix,r_m)
 
-    for nn=1:Nfilled
+	nextindex = zeros(Int64,3)
 
-		# Inter-trimer forces
-        kk,ll,mm = nonZeroGrids[nn]
-        for ii=1:cellLists[kk,ll,mm,1]
-            celllabel1 = cellLists[kk,ll,mm,ii+1]
+    for (index,list) in nonEmptyGridPoints
+
+        for ii in list
             for xx=-1:1
-                if (kk+xx)==0 || (kk+xx)==Ng+1
-                    #skip
-                else
-                    for yy=-1:1
-                        if (ll+yy)==0 || (ll+yy)==Ng+1
-                            #skip
-                        else
-                            for zz=-1:1
-                                if (mm+zz)==0 || (mm+zz)==Ng+1
-                                    #skip
-                                else
-                                    for jj=1:cellLists[kk+xx,ll+yy,mm+zz,1]
-                                        celllabel2 = cellLists[kk+xx,ll+yy,mm+zz,jj+1]
-                                        if floor(Int8,(celllabel1-1)/Ndomains)==floor(Int8,(celllabel2-1)/Ndomains) && abs(celllabel1-celllabel2)<=1
-                                            # Skip adjacent particles in same trimer
-                                        else
-                                            dx .= pos[celllabel2,:] - pos[celllabel1,:]
-                                            dxmag_sq = dot(dx,dx)
-                                            if dxmag_sq > intrctnThrshld^2
-                                                # Skip pairs with separation beyond threshold (technically some may exist despite cell list)
-                                            else
-                                                if (celllabel1+3)%Ndomains == (celllabel2-1)%Ndomains && floor(Int8,(celllabel1-1)/Ndomains)!=floor(Int8,(celllabel2-1)/Ndomains)
-                                                    # Apply adhesive van der waals force in stepped fashion between trimers
-                                                    lennardJones!(dx,ϵ,σ)
-                                                    F[celllabel1,:] .+= dx
-                                                    F[celllabel2,:] .-= dx
-                                                elseif dxmag_sq < WCAthresh_sq
-                                                    # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
-                                                    lennardJones!(dx,ϵ,σ)
-                                                    F[celllabel1,:] .+= dx
-                                                    F[celllabel2,:] .-= dx
-                                                else
-                                                    # Skip any pairs within interaction range, beyond WCA range, and without specified adhesive rule
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
+                for yy=-1:1
+                    for zz=-1:1
+						#if haskey(nonEmptyGridPoints,index.+[xx,yy,zz])
+							nextindex = index+[xx,yy,zz]
+	                        for jj in nonEmptyGridPoints[nextindex]
+	                            if floor(Int8,(ii-1)/Ndomains)==floor(Int8,(jj-1)/Ndomains) && abs(ii-jj)<=1
+	                                # Skip adjacent particles in same trimer
+	                            else
+	                                dx .= pos[jj,:] - pos[ii,:]
+	                                dxmag_sq = dot(dx,dx)
+	                                if dxmag_sq > intrctnThrshld^2
+	                                    # Skip pairs with separation beyond threshold (technically some may exist despite cell list)
+	                                else
+	                                	if (ii+3)%Ndomains == (jj-1)%Ndomains && floor(Int8,(ii-1)/Ndomains)!=floor(Int8,(jj-1)/Ndomains)
+	                                    	# Apply adhesive van der waals force in stepped fashion between trimers
+	                                        lennardJones!(dx,ϵ,σ)
+	                                        F[ii,:] .+= dx
+	                                        F[jj,:] .-= dx
+	                                    elseif dxmag_sq < WCAthresh_sq
+	                                        # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
+	                                        lennardJones!(dx,ϵ,σ)
+	                                        F[ii,:] .+= dx
+	                                        F[jj,:] .-= dx
+	                                    else
+	                                        # Skip any pairs within interaction range, beyond WCA range, and without specified adhesive rule
+	                                    end
+	                                end
+	                            end
+	                        end
+						#else
+							# skip
+						#end
                     end
                 end
             end
@@ -69,23 +61,23 @@ using .LennardJones
 
 		# Boundary forces
         for jj=1:3
-			if nonZeroGrids[nn][jj]==1
-				for kk in 1:cellLists[nonZeroGrids[nn]...,1]
-					dxmag = (boxSize/2.0 + pos[cellLists[nonZeroGrids[nn]...,1+kk],jj])
+			if index[jj]==1
+				for kk in list
+					dxmag = (boxSize/2.0 + pos[kk,jj])
 					if dxmag < r_m
 						# Use morse potential approximation of Lennard Jones because it is valid over values less than zero. Approximation from http://www.znaturforsch.com/aa/v58a/s58a0615.pdf
 						Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
-						F[cellLists[nonZeroGrids[nn]...,1+kk],:] .-= (Fmag/dxmag).*dxMatrix[jj,:]
+						F[kk,:] .-= (Fmag/dxmag).*dxMatrix[jj,:]
 					end
 				end
 			end
-			if nonZeroGrids[nn][jj]==Ng
-				for kk in 1:cellLists[nonZeroGrids[nn]...,1]
-					dxmag = (boxSize/2.0 - pos[cellLists[nonZeroGrids[nn]...,1+kk],jj])
+			if index[jj]==Ng
+				for kk in list
+					dxmag = (boxSize/2.0 - pos[kk,jj])
 					if dxmag < r_m
 						# Use morse potential approximation of Lennard Jones because it is valid over values less than zero. Approximation from http://www.znaturforsch.com/aa/v58a/s58a0615.pdf
 						Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
-						F[cellLists[nonZeroGrids[nn]...,1+kk],:] .+= (Fmag/dxmag).*dxMatrix[jj,:]
+						F[kk,:] .+= (Fmag/dxmag).*dxMatrix[jj,:]
 					end
 				end
 			end

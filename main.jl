@@ -12,6 +12,7 @@
 using Distributions
 using LinearAlgebra
 using Random
+using DataStructures
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
@@ -76,11 +77,11 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     F              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz dimensions of all forces applied to particles
     Fmags          = zeros(Float64,Ndomains*Ntrimers)       # Vector of force magnitudes for all particules
     W              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz values of stochastic Wiener process for all particles
-    cellLists      = zeros(Int64,Ng,Ng,Ng,20)               # Cell list grid
-    nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
-    Nfilled        = 0                                      # Number of non-empty grid points in cellLists
+    #cellLists      = zeros(Int64,Ng,Ng,Ng,20)               # Cell list grid
+    #nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
+    #Nfilled        = 0                                      # Number of non-empty grid points in cellLists
     dxMatrix       = Matrix(1I, 3, 3)                       # Identity matrix for later calculations
-
+    nonEmptyGridPoints = DefaultDict{Vector{Int64}, Vector{Int64}}(Vector{Int64})
     # Initialise system time
     t = 0.0
     dt = 0.0
@@ -89,7 +90,6 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     AA = zeros(Float64,3)
     BB = zeros(Float64,3)
     CC = zeros(Float64,3)
-    DD = zeros(Int64,3)
 
     # Create random number generators
     RNG = Random.MersenneTwister()
@@ -108,13 +108,13 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     while t<tmax
 
         # Create cell lists array for interactions
-        Nfilled = cellLists!(pos,allDomains,cellLists,nonZeroGrids,boxSize,intrctnThrshld)
+        cellLists(nonEmptyGridPoints,pos,allDomains,boxSize/2.0,intrctnThrshld)
 
         # Calculate tension and bending forces within each trimer
         internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        interTrimerForces!(pos,F,Ntrimers,Ndomains,ϵLJ,σ,AA,cellLists,Ng,WCAthresh_sq,intrctnThrshld,nonZeroGrids,Nfilled,boxSize,dxMatrix,r_m)
+        interTrimerForces!(nonEmptyGridPoints,pos,F,Ndomains,ϵLJ,σ,AA,Ng,WCAthresh_sq,intrctnThrshld,boxSize,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
         dt = adaptTimestep(F,Fmags,Ntrimers,Ndomains,σ,D,kT)

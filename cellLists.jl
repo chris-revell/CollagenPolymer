@@ -9,26 +9,23 @@
 module CellLists
 
 using LinearAlgebra
+using DataStructures
 
-@inline function cellLists!(pos,allDomains,cellLists,nonZeroGrids,boxSize,intrctnThrshld)
+@inline function cellLists(nonEmptyGridPoints,pos,allDomains,halfBoxSize,intrctnThrshld)
 
-	# Create cell list to identify trimer pairs within interaction range
-	cellLists[:,:,:,1] .= 0
-	Nfilled = 0
+	empty!(nonEmptyGridPoints)
+	# Loop over all particles
 	for jj=1:allDomains
-		i = ceil.(Int64,(pos[jj,:] .+ boxSize/2.0)/intrctnThrshld)
-		cellLists[i...,1] += 1
-		cellLists[i...,cellLists[i...,1]+1] = jj
-		if i in nonZeroGrids[1:Nfilled]
-			# Skip
-		else
-			Nfilled+=1
-			nonZeroGrids[Nfilled] = i
-		end
+		# Find grid point that particle sits within
+		cellIndex = ceil.(Int64,(pos[jj,:] .+ halfBoxSize)/intrctnThrshld)
+		# Update cell list with this particle
+		push!(nonEmptyGridPoints[cellIndex],jj)
 	end
-	return Nfilled
+	# Return the number of grid points that contain particles
+	return nonEmptyGridPoints
+
 end
 
-export cellLists!
+export cellLists
 
 end
