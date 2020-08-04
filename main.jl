@@ -12,26 +12,29 @@
 using Distributions
 using LinearAlgebra
 using Random
-using Dictionaries
 # Import program modules
 include("./outputData.jl")
 include("./calculateNoise.jl")
 include("./updateSystem.jl")
 include("./internalForces.jl")
+include("./boundaryForces.jl")
 include("./interTrimerForces.jl")
 include("./initialise.jl")
 include("./createRunDirectory.jl")
-include("./cellLists.jl")
+#include("./cellLists.jl")
 include("./adaptTimestep.jl")
+include("./cellListFunctions.jl")
 using .InternalForces
+using .BoundaryForces
 using .InterTrimerForces
 using .CalculateNoise
 using .UpdateSystem
 using .OutputData
 using .Initialise
 using .CreateRunDirectory
-using .CellLists
+#using .CellLists
 using .AdaptTimestep
+using .CellListFunctions
 
 
 # Define run parameters
@@ -81,7 +84,9 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     #nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
     #Nfilled        = 0                                      # Number of non-empty grid points in cellLists
     dxMatrix       = Matrix(1I, 3, 3)                       # Identity matrix for later calculations
-    nonEmptyGridPoints = Dictionary{Vector{Int64}, Vector{Int64}}()
+    #nonEmptyGridPoints = Dictionary{Tuple{Int64,Int64,Int64}, Vector{Int64}}()
+    pairs_list = Tuple{Int64, Int64}[]
+    boundary_list = Tuple{Int64,Int64,Int64}[]
     # Initialise system time
     t = 0.0
     dt = 0.0
@@ -108,13 +113,16 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     while t<tmax
 
         # Create cell lists array for interactions
-        cellLists(nonEmptyGridPoints,pos,allDomains,boxSize/2.0,intrctnThrshld)
+        #cellLists(nonEmptyGridPoints,pos,allDomains,boxSize/2.0,intrctnThrshld)
+        pairs_list,boundary_list = find_pairs(allDomains,pos,intrctnThrshld,Ng)
 
         # Calculate tension and bending forces within each trimer
         internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        interTrimerForces!(nonEmptyGridPoints,pos,F,Ndomains,ϵLJ,σ,AA,Ng,WCAthresh_sq,intrctnThrshld,boxSize,dxMatrix,r_m)
+        interTrimerForces!(pairs_list,pos,F,Ndomains,ϵLJ,σ,AA,WCAthresh_sq,intrctnThrshld)
+
+        boundaryForces!(boundary_list,pos,F,ϵLJ,Ng,boxSize,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
         dt = adaptTimestep(F,Fmags,Ntrimers,Ndomains,σ,D,kT)
