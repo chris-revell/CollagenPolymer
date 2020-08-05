@@ -12,14 +12,17 @@ using Random
 using Distributions
 
 @inline function initialise(pos,Ntrimers,Ndomains,domainLength,boxSize)
+
+    # Arrays to prevent reallocation
     initialx = zeros(3)
     initialAngle = zeros(2)
     dx = zeros(3)
 
+    # Create each trimer
     for ii=0:Ntrimers-1
 
         notFound = true
-        # initialx     .= rand(Uniform(-boxSize/2.0,boxSize/2.0),3)
+        # Loop to find random trimer position and orientation such that it will fit within system box
         while notFound
             initialx     .= rand(Uniform(-boxSize/2.0,boxSize/2.0),3)
             initialAngle .= rand(Uniform(0.0,π),2) .* [2.0,1.0]
@@ -30,11 +33,12 @@ using Distributions
                 notFound = false
             end
         end
-
+        # Once position and orientation is found, initialise all particles within trimer
         for jj=1:Ndomains
             pos[ii*Ndomains+jj,:] .= initialx .+ (jj-1)*domainLength.*dx
         end
     end
+    return nothing
 end
 
 export initialise

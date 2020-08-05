@@ -24,6 +24,7 @@ using LinearAlgebra
         W[ii,2] += ranR*sin(ranTheta)*sin(ranPhi)
         W[ii,3] += ranR*cos(ranPhi)
     end
+    return nothing
 end
 
 export calculateNoise!

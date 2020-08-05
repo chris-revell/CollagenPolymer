@@ -11,10 +11,11 @@ module InterTrimerForces
 include("lennardJones.jl")
 using LinearAlgebra
 using .LennardJones
+using .Threads
 
 @inline function interTrimerForces!(pairs_list,pos,F,Ndomains,ϵ,σ,dx,WCAthresh_sq,intrctnThrshld)
 
-    for (ii,jj) in pairs_list
+    @threads for (ii,jj) in pairs_list
         if floor(Int8,(ii-1)/Ndomains)==floor(Int8,(jj-1)/Ndomains) && abs(ii-jj)<=1
             # Skip adjacent particles in same trimer
         else

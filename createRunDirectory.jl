@@ -12,8 +12,10 @@ using Dates
 
 function createRunDirectory(Ntrimers,L,Ndomains,μ,kT,ϵLJ,σ,k,re,Ebend,D,tmax,outputInterval,Ng,boxSize)
 
+    # Create directory for run data labelled with current time.
     foldername = Dates.format(Dates.now(),"yyyy-mm-dd-HH-MM-SS")
     mkdir("output/$(foldername)")
+    # Store system parameters. 
     open("output/$(foldername)/conditions.txt","w") do conditionsfile
         println(conditionsfile,"Ntrimers       $Ntrimers      ")
         println(conditionsfile,"L              $L              ")

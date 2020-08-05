@@ -45,7 +45,7 @@ const Ebend_in       = 1000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
 const tmax           = 0.1  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
-const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
+const renderFlag     = 0        # Controls whether or not system is visualised with povRay automatically
 
 
 #%%
@@ -86,16 +86,19 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     neighbour_cells= Vector{Tuple{Int64,Int64,Int64}}(undef, 13) # Vector storing 13 neighbouring cells for a given cell
 
     # Initialise system time
-    t = 0.0
+    t  = 0.0
     dt = 0.0
 
     # Allocate variables to reuse in calculations and prevent memory reallocations
-    AA = zeros(Float64,3)
-    BB = zeros(Float64,3)
-    CC = zeros(Float64,3)
+    AA = zeros(Float64,3,nthreads())
+    BB = zeros(Float64,3,nthreads())
+    CC = zeros(Float64,3,nthreads())
 
-    # Create random number generators
-    RNG = Random.MersenneTwister()
+    # Create random number generators for each thread
+    ThreadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
+    for i in 1:nthreads()
+        ThreadRNG[i] = Random.MersenneTwister()
+    end
 
     # Initialise trimers within boxSize space
     initialise(pos,Ntrimers,Ndomains,re,boxSize)
@@ -123,7 +126,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         boundaryForces!(boundary_list,pos,F,ϵLJ,Ng,boxSize,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
-        dt = adaptTimestep(F,Fmags,Ntrimers,Ndomains,σ,D,kT)
+        dt = adaptTimestep!(F,Fmags,Ntrimers,Ndomains,σ,D,kT)
 
         # Find stochastic term (Wiener process) for all monomers
         calculateNoise!(W,Ntrimers,Ndomains,dt,RNG)
@@ -149,6 +152,7 @@ end
 
 #%%
 
+# Quick run to precompile
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
 #println("timing")
 #using BenchmarkTools
