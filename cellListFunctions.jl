@@ -15,15 +15,13 @@ module CellListFunctions
     const Intx2 = Tuple{Int64, Int64}
     const Intx3 = Tuple{Int64, Int64, Int64}
 
-    @inline function find_pairs(N_particles::Int64, pos::Array{Float64,2}, s::Float64, N_grid::Int64)
+    @inline function find_pairs(N_particles::Int64, pos::Array{Float64,2}, s::Float64, N_grid::Int64, neighbour_cells::Vector{Intx3})
 
         pairs_list = Intx2[] # Array of tuples storing neighbour pairs
         boundary_list = Intx3[]
 
         # Allocate all particles in matrix pos to grid points
         cell_lists = grid_allocate(pos,N_particles,s)
-
-        neighbour_cells = Vector{Intx3}(undef, 13) # Vector storing 13 neighbouring cells for a given cell
 
         for key in keys(cell_lists)
             same_cell_pairs!(cell_lists[key], pairs_list, pos, s)

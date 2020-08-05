@@ -20,14 +20,11 @@ using .LennardJones
         else
             dx .= pos[jj,:] - pos[ii,:]
             dxmag_sq = dot(dx,dx)
-
-
         	if (ii+3)%Ndomains == (jj-1)%Ndomains && floor(Int8,(ii-1)/Ndomains)!=floor(Int8,(jj-1)/Ndomains)
             	# Apply adhesive van der waals force in stepped fashion between trimers
                 lennardJones!(dx,ϵ,σ)
                 F[ii,:] .+= dx
                 F[jj,:] .-= dx
-                println("attraction")            
             elseif dxmag_sq < WCAthresh_sq
                 # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
                 lennardJones!(dx,ϵ,σ)

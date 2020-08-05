@@ -21,7 +21,6 @@ include("./boundaryForces.jl")
 include("./interTrimerForces.jl")
 include("./initialise.jl")
 include("./createRunDirectory.jl")
-#include("./cellLists.jl")
 include("./adaptTimestep.jl")
 include("./cellListFunctions.jl")
 using .InternalForces
@@ -32,7 +31,6 @@ using .UpdateSystem
 using .OutputData
 using .Initialise
 using .CreateRunDirectory
-#using .CellLists
 using .AdaptTimestep
 using .CellListFunctions
 
@@ -40,12 +38,12 @@ using .CellListFunctions
 # Define run parameters
 const Ntrimers       = 5       # Number of collagen trimers
 const L              = 0.5      # Length of one trimer
-const σ              = 0.0025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
-const ϵLJ_in         = 10.0     # External Lennard-Jones energy
+const σ              = 0.025   # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
+const ϵLJ_in         = 100.0     # External Lennard-Jones energy
 const k_in           = 100000000.0  # Internal spring stiffness for Fraenkel spring forces between adjacent particles within a trimer
-const Ebend_in       = 1000000.0  # Internal bending modulus of trimer
+const Ebend_in       = 1000.0  # Internal bending modulus of trimer
 const boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-const tmax           = 0.000001  # Total simulation time
+const tmax           = 0.1  # Total simulation time
 const outputFlag     = 1        # Controls whether or not data is printed to file
 const renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
@@ -56,37 +54,37 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
 @inline function main(Ntrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tmax::Float64,outputFlag::Int64,renderFlag::Int64)
 
     # Thermodynamic parameters
-    μ              = 1.0                               # Fluid viscosity
-    kT             = 1.0                               # Boltzmann constant*Temperature
+    μ              = 1.0                                # Fluid viscosity
+    kT             = 1.0                                # Boltzmann constant*Temperature
 
     # Force parameters
-    ϵLJ            = ϵLJ_in*kT                         # External Lennard-Jones energy
-    k              = k_in*kT                           # Internal spring stiffness for forces between adjacent particles within a trimer
-    Ebend          = Ebend_in*kT                       # Internal bending modulus of trimer
+    ϵLJ            = ϵLJ_in*kT                          # External Lennard-Jones energy
+    k              = k_in*kT                            # Internal spring stiffness for forces between adjacent particles within a trimer
+    Ebend          = Ebend_in*kT                        # Internal bending modulus of trimer
 
     # Derived parameters
-    outputInterval = tmax/100.0                        # Time interval for writing position data to file
-    intrctnThrshld = 2.0*σ                             # Threshold separation for van der Waals interactions
-    Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*σ)+1.0) # Number of particles per trimer, ensuring re<=0.4σ and thus preventing corrugation issues
-    re             = (L-σ)/(Ndomains-1)                # Equilibrium separation of springs connecting adjacent particles within a trimer
-    allDomains     = Ntrimers*Ndomains                 # Total number of particles in system
-    r_m            = σ*2.0^(1.0/6.0)                   # Separation at which LJ potential is minimised
-    WCAthresh_sq   = (r_m)^2                           # Cutoff threshold for WCA potential - separation at which force is zero - squared
-    D              = kT/(6.0*π*μ*σ)                    # Diffusion constant
-    Ng             = ceil(Int64,boxSize/intrctnThrshld)# Dimensions of cellLists array
+    outputInterval = tmax/100.0                         # Time interval for writing position data to file
+    intrctnThrshld = 2.0*σ                              # Threshold separation for van der Waals interactions
+    Ndomains       = 1+ceil(Int64,(5.0*L)/(4.0*σ)+1.0)  # Number of particles per trimer, ensuring re<=0.4σ and thus preventing corrugation issues
+    re             = (L-σ)/(Ndomains-1)                 # Equilibrium separation of springs connecting adjacent particles within a trimer
+    allDomains     = Ntrimers*Ndomains                  # Total number of particles in system
+    r_m            = σ*2.0^(1.0/6.0)                    # Separation at which LJ potential is minimised
+    WCAthresh_sq   = (r_m)^2                            # Cutoff threshold for WCA potential - separation at which force is zero - squared
+    D              = kT/(6.0*π*μ*σ)                     # Diffusion constant
+    Ng             = ceil(Int64,boxSize/intrctnThrshld) # Dimensions of cellLists array
 
     # Data arrays
-    pos            = zeros(Float64,Ntrimers*Ndomains,3)     # xyz positions of all particles
-    F              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz dimensions of all forces applied to particles
-    Fmags          = zeros(Float64,Ndomains*Ntrimers)       # Vector of force magnitudes for all particules
-    W              = zeros(Float64,Ndomains*Ntrimers,3)     # xyz values of stochastic Wiener process for all particles
-    #cellLists      = zeros(Int64,Ng,Ng,Ng,20)               # Cell list grid
-    #nonZeroGrids   = fill(zeros(Int64,3), Ndomains*Ntrimers)# Stores locations of non-empty grid points in cellLists
-    #Nfilled        = 0                                      # Number of non-empty grid points in cellLists
-    dxMatrix       = Matrix(1I, 3, 3)                       # Identity matrix for later calculations
-    #nonEmptyGridPoints = Dictionary{Tuple{Int64,Int64,Int64}, Vector{Int64}}()
-    pairs_list = Tuple{Int64, Int64}[]
-    boundary_list = Tuple{Int64,Int64,Int64}[]
+    pos            = zeros(Float64,Ntrimers*Ndomains,3) # xyz positions of all particles
+    F              = zeros(Float64,Ndomains*Ntrimers,3) # xyz dimensions of all forces applied to particles
+    Fmags          = zeros(Float64,Ndomains*Ntrimers)   # Vector of force magnitudes for all particules
+    W              = zeros(Float64,Ndomains*Ntrimers,3) # xyz values of stochastic Wiener process for all particles
+    pairs_list     = Tuple{Int64, Int64}[]              # Array storing tuple of particle interaction pairs eg pairs_list[2]=(1,5) => 2nd element of array shows that particles 1 and 5 are in interaction range
+    boundary_list  = Tuple{Int64,Int64,Int64}[]         # Array storing list of particles in boundary cells, with 2nd and 3rd components of tuples storing which part of boundary cell is at
+
+    dxMatrix       = Matrix(1I, 3, 3)                   # Identity matrix for later calculations
+
+    neighbour_cells= Vector{Tuple{Int64,Int64,Int64}}(undef, 13) # Vector storing 13 neighbouring cells for a given cell
+
     # Initialise system time
     t = 0.0
     dt = 0.0
@@ -112,9 +110,8 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
     #Iterate over time until max system time is reached
     while t<tmax
 
-        # Create cell lists array for interactions
-        #cellLists(nonEmptyGridPoints,pos,allDomains,boxSize/2.0,intrctnThrshld)
-        pairs_list,boundary_list = find_pairs(allDomains,pos,intrctnThrshld,Ng)
+        # Create list of particle interaction pairs based on cell lists algorithm
+        pairs_list,boundary_list = find_pairs(allDomains,pos,intrctnThrshld,Ng,neighbour_cells)
 
         # Calculate tension and bending forces within each trimer
         internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
@@ -122,6 +119,7 @@ const renderFlag     = 1        # Controls whether or not system is visualised w
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
         interTrimerForces!(pairs_list,pos,F,Ndomains,ϵLJ,σ,AA,WCAthresh_sq,intrctnThrshld)
 
+        # Calculate forces on particles from system boundary
         boundaryForces!(boundary_list,pos,F,ϵLJ,Ng,boxSize,dxMatrix,r_m)
 
         # Adapt timestep to maximum force value
@@ -152,9 +150,10 @@ end
 #%%
 
 main(1,0.5,0.05,1.0,1.0,1.0,1.0,0.00001,0,0)
-println("timing")
-using BenchmarkTools
-@btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
+#println("timing")
+#using BenchmarkTools
+#@btime main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,0,0)
+main(Ntrimers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tmax,1,1)
 
 #using BenchmarkTools
 #println("Timing")
