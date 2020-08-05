@@ -12,7 +12,7 @@ using LinearAlgebra
 
 @inline function updateSystem!(pos,F,W,t,dt,D,kT)
 
-    pos .+= F[:,:,1].*(dt*D/kT) .+ W.*sqrt(2.0*D)
+    pos .+= F[:,:,1].*(dt*D/kT) .+ W[:,:,1].*sqrt(2.0*D)
     F .= 0
     W .= 0
 

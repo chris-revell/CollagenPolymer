@@ -9,11 +9,12 @@
 module InternalForces
 
 using LinearAlgebra
+using .Threads
 
-@inline function internalForces!(pos,F,Ntrimers,Ndomains,k,re,Ebend,AA,BB,CC)
+function internalForces!(pos,F,Ntrimers,Ndomains,allDomains,k,re,Ebend,AA,BB,CC)
 
 	# Loop over all particles
-	@threads for jj=1:Ndomains*Ntrimers
+	@threads for jj=1:allDomains
 
 		# Tension forces between trimer domains
 		if jj%Ndomains == 0
