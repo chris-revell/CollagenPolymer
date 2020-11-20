@@ -10,8 +10,8 @@ module InterTrimerForces
 
 include("lennardJones.jl")
 using LinearAlgebra
-using .LennardJones
-using .Threads
+using LennardJones
+using Base.Threads
 
 @inline function interTrimerForces!(pairs_list,pos,F,Ndomains,ϵ,σ,dx,WCAthresh_sq,intrctnThrshld)
 

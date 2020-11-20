@@ -12,28 +12,20 @@
 using Distributions
 using LinearAlgebra
 using Random
-using .Threads
-# Import program modules
-include("./outputData.jl")
-include("./calculateNoise.jl")
-include("./updateSystem.jl")
-include("./internalForces.jl")
-include("./boundaryForces.jl")
-include("./interTrimerForces.jl")
-include("./initialise.jl")
-include("./createRunDirectory.jl")
-include("./adaptTimestep.jl")
-include("./cellListFunctions.jl")
-using .InternalForces
-using .BoundaryForces
-using .InterTrimerForces
-using .CalculateNoise
-using .UpdateSystem
-using .OutputData
-using .Initialise
-using .CreateRunDirectory
-using .AdaptTimestep
-using .CellListFunctions
+using Base.Threads
+
+# Import local program modules
+push!(LOAD_PATH, "./")
+using InternalForces
+using BoundaryForces
+using InterTrimerForces
+using CalculateNoise
+using UpdateSystem
+using OutputData
+using Initialise
+using CreateRunDirectory
+using AdaptTimestep
+using CellListFunctions
 
 
 

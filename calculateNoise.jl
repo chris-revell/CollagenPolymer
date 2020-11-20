@@ -11,7 +11,7 @@ module CalculateNoise
 using Random
 using Distributions
 using LinearAlgebra
-using .Threads
+using Base.Threads
 
 @inline function calculateNoise!(W,Ntrimers,Ndomains,dt,RNG)
 

@@ -9,7 +9,7 @@
 module InternalForces
 
 using LinearAlgebra
-using .Threads
+using Base.Threads
 
 function internalForces!(pos,F,Ntrimers,Ndomains,allDomains,k,re,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
 
