@@ -1,5 +1,5 @@
 #
-#  internalForces.jl
+#  InternalForces.jl
 #  collagen-model-jl
 #
 #  Created by Christopher Revell on 04/07/2020.
@@ -11,30 +11,30 @@ module InternalForces
 using LinearAlgebra
 using Base.Threads
 
-function internalForces!(pos,F,Ntrimers,Ndomains,allDomains,k,re,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
+function internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
 
 	# Loop over all particles
-	@threads for jj=1:allDomains
+	@threads for jj=1:nParticles
 
 		# Tension forces between trimer domains
-		if jj%Ndomains == 0
+		if jj%nDomains == 0
 			# Skip at the end of each trimer
 		else
 			# Calculate tension forces between adjacent particles with Hookean spring potential
-			AA[:,threadid()] .= pos[jj+1,:] .- pos[jj,:]
+			AA[:,threadid()] .= pos[jj+1] .- pos[jj]
 		    AA_mag = sqrt(dot(AA[:,threadid()],AA[:,threadid()]))
 			AA_bar[:,threadid()] .= AA[:,threadid()]./AA_mag
 
-			dif = AA_mag - re
+			dif = AA_mag - rₑ
 		    F[jj,:,threadid()]   .+= dif*k.*AA[:,threadid()]./AA_mag
 		    F[jj+1,:,threadid()] .-= dif*k.*AA[:,threadid()]./AA_mag
 
 			# Bending forces
-			if (jj+1)%Ndomains == 0
+			if (jj+1)%nDomains == 0
 				# Skip at the end of each trimer
 			else
 				# Vector from second particle to third
-				BB[:,threadid()] = pos[jj+2,:] .- pos[jj+1,:]
+				BB[:,threadid()] = pos[jj+2 .- pos[jj+1]
 				BB_mag = sqrt(dot(BB[:,threadid()],BB[:,threadid()]))
 				BB_bar[:,threadid()] .= BB[:,threadid()]./BB_mag
 

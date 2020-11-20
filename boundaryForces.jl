@@ -1,5 +1,5 @@
 #
-#  boundarForces.jl
+#  BoundarForces.jl
 #  collagen-model-jl
 #
 #  Created by Christopher Revell on 04/08/2020.
@@ -10,20 +10,20 @@ module BoundaryForces
 
 using LinearAlgebra
 
-@inline function boundaryForces!(boundary_list,pos,F,ϵ,Ng,boxSize,dxMatrix,r_m)
+@inline function boundaryForces!(boundaryList,pos,F,ϵ,nGrid,boxSize,dxMatrix,rₘ)
 	# Boundary forces
-	for (particle,dimension,edge) in boundary_list
+	for (particle,dimension,edge) in boundaryList
 		if edge == 1
-			dxmag = boxSize/2.0 + pos[particle,dimension]
-			if dxmag < r_m
-				Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
+			dxmag = boxSize/2.0 + pos[particle][dimension]
+			if dxmag < rₘ
+				Fmag = (12.0*ϵ/rₘ)*(exp(6.0*(1.0-dxmag/rₘ))-exp(12.0*(1.0-dxmag/rₘ)))
 				F[particle,:] .-= (Fmag/dxmag).*dxMatrix[dimension,:]
 			end
 		end
-		if edge == Ng
-			dxmag = boxSize/2.0 - pos[particle,dimension]
-			if dxmag < r_m
-				Fmag = (12.0*ϵ/r_m)*(exp(6.0*(1.0-dxmag/r_m))-exp(12.0*(1.0-dxmag/r_m)))
+		if edge == nGrid
+			dxmag = boxSize/2.0 - pos[particle][dimension]
+			if dxmag < rₘ
+				Fmag = (12.0*ϵ/rₘ)*(exp(6.0*(1.0-dxmag/rₘ))-exp(12.0*(1.0-dxmag/rₘ)))
 				F[particle,:] .+= (Fmag/dxmag).*dxMatrix[dimension,:]
 			end
 		end

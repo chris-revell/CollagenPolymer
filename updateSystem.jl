@@ -1,5 +1,5 @@
 #
-#  updateSystem.jl
+#  UpdateSystem.jl
 #  collagen-model-jl
 #
 #  Created by Christopher Revell on 30/03/2020.
@@ -9,14 +9,16 @@
 module UpdateSystem
 
 using LinearAlgebra
+using StaticArrays
 
-@inline function updateSystem!(pos,F,W,t,dt,D,kT)
+@inline @views function updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
-    pos .+= F[:,:,1].*(dt*D/kT) .+ W[:,:,1].*sqrt(2.0*D)
+    @threads for i=1:nParticles
+        pos[i] = SVector{3}(F[:,:,1].*(Δt*D/kT) .+ W[i].*sqrt(2.0*D*Δt))
+    end
     F .= 0
-    W .= 0
 
-    return t += dt
+    return t += Δt
 
 end
 

@@ -1,5 +1,5 @@
 #
-#  interTrimerForces.jl
+#  InterTrimerForces.jl
 #  collagen-model-jl
 #
 #  Created by Christopher Revell on 30/03/2020.
@@ -11,22 +11,23 @@ module InterTrimerForces
 include("lennardJones.jl")
 using LinearAlgebra
 using LennardJones
+using StaticArrays
 using Base.Threads
 
-@inline function interTrimerForces!(pairs_list,pos,F,Ndomains,ϵ,σ,dx,WCAthresh_sq,intrctnThrshld)
+@inline function interTrimerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
 
-    @threads for (ii,jj) in pairs_list
-        if floor(Int8,(ii-1)/Ndomains)==floor(Int8,(jj-1)/Ndomains) && abs(ii-jj)<=1
+    @threads @views for (ii,jj) in pairsList
+        if floor(Int8,(ii-1)/nDomains)==floor(Int8,(jj-1)/nDomains) && abs(ii-jj)<=1
             # Skip adjacent particles in same trimer
         else
-            dx[:,threadid()] .= pos[jj,:] - pos[ii,:]
+            dx[:,threadid()] .= pos[jj] .- pos[ii]
             dxmag_sq = dot(dx,dx)
-        	if (ii+3)%Ndomains == (jj-1)%Ndomains && floor(Int8,(ii-1)/Ndomains)!=floor(Int8,(jj-1)/Ndomains)
+        	if (ii+3)%nDomains == (jj-1)%nDomains && floor(Int8,(ii-1)/nDomains)!=floor(Int8,(jj-1)/nDomains)
             	# Apply adhesive van der waals force in stepped fashion between trimers
                 lennardJones!(dx,ϵ,σ)
                 F[ii,:,threadid()] .+= dx[:,threadid()]
                 F[jj,:,threadid()] .-= dx[:,threadid()]
-            elseif dxmag_sq < WCAthresh_sq
+            elseif dxmag_sq < WCAthreshSq
                 # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
                 lennardJones!(dx,ϵ,σ)
                 F[ii,:,threadid()] .+= dx[:,threadid()]
