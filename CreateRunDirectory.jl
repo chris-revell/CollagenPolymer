@@ -1,6 +1,6 @@
 #
 #  CreateRunDirectory.jl
-#  collagen-model-jl
+#  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 02/05/2020.
 #

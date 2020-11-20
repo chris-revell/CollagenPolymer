@@ -1,6 +1,6 @@
 #
 #  OutputData.jl
-#  collagen-model-jl
+#  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #

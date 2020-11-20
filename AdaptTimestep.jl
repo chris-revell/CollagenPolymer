@@ -1,6 +1,6 @@
 #
 #  AdaptTimestep.jl
-#  collagen-model-jl
+#  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 06/07/2020.
 #

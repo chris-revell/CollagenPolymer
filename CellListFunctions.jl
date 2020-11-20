@@ -1,6 +1,6 @@
 #
 #  CellListFunctions.jl
-#  collagen-model-jl
+#  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 03/08/2020.
 #

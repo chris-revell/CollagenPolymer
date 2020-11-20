@@ -1,6 +1,6 @@
 #
 #  BoundarForces.jl
-#  collagen-model-jl
+#  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 04/08/2020.
 #

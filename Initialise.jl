@@ -1,6 +1,6 @@
 #
 #  Initialise.jl
-#  collagen-model-jl
+#  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 01/05/2020.
 #
