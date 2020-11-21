@@ -20,9 +20,11 @@ with open("{}/conditions.txt".format(argv[1])) as f:
        (key, val) = line.split()
        conditions[key] = float(val)
 
-for i in range(int(conditions["tMax"]/conditions["outputInterval"])):
-    os.system("clear")
-    print("Rendering {}/{}".format(i,int(conditions["tMax"]/conditions["outputInterval"])))
+nImages = int(data.shape[0]/(float(conditions["nTrimers"])*float(conditions["nDomains"])))
+
+for i in range(nImages):
+    #os.system("clear")
+    print("Rendering {}/{}".format(i,nImages))
     outfile = open("{}/povrayTmp{:03d}.pov".format(argv[1],i),"w")
     outfile.write("#include \"colors.inc\"\n")
     outfile.write("camera {\n" )
