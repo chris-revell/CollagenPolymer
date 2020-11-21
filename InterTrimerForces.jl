@@ -8,15 +8,14 @@
 
 module InterTrimerForces
 
-include("lennardJones.jl")
 using LinearAlgebra
 using LennardJones
 using StaticArrays
 using Base.Threads
 
-@inline function interTrimerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
+@inline @views function interTrimerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
 
-    @threads @views for (ii,jj) in pairsList
+    @threads for (ii,jj) in pairsList
         if floor(Int8,(ii-1)/nDomains)==floor(Int8,(jj-1)/nDomains) && abs(ii-jj)<=1
             # Skip adjacent particles in same trimer
         else

@@ -11,7 +11,7 @@ module Initialise
 using Random
 using Distributions
 
-@inline function initialise!(pos,nTrimers,nDomains,domainLength,boxSize)
+@inline @views function initialise!(pos,nTrimers,nDomains,domainLength,boxSize)
 
     # Arrays to prevent reallocation
     initialx = zeros(3)

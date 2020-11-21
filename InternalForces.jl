@@ -34,7 +34,7 @@ function internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_b
 				# Skip at the end of each trimer
 			else
 				# Vector from second particle to third
-				BB[:,threadid()] = pos[jj+2 .- pos[jj+1]
+				BB[:,threadid()] = pos[jj+2] .- pos[jj+1]
 				BB_mag = sqrt(dot(BB[:,threadid()],BB[:,threadid()]))
 				BB_bar[:,threadid()] .= BB[:,threadid()]./BB_mag
 
@@ -54,7 +54,7 @@ function internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_b
 					EE[:,threadid()] = cross(BB[:,threadid()],CC[:,threadid()])
 					EE_mag = sqrt(dot(EE[:,threadid()],EE[:,threadid()]))
 					EE_bar[:,threadid()] .= EE[:,threadid()]./EE_mag
-
+					
 					θ=acos(dot(-AA_bar[:,threadid()],BB_bar[:,threadid()]))
 					Fmag = Ebend*(π-θ)
 

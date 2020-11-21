@@ -11,11 +11,11 @@ module OutputData
 using DelimitedFiles
 using LinearAlgebra
 
-@inline function outputData(pos,outfile,t,tMax,nTrimers,nDomains,σ)
+@inline @views function outputData(pos,outfile,t,tMax,nTrimers,nDomains,σ)
 
     writedlm(outfile,pos,", ")
     flush(outfile)
-    run(`clear`)
+    #run(`clear`)
     println("Simulating: $t/$tMax")
 
     # Measure trimer lengths

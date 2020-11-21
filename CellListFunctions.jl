@@ -11,6 +11,7 @@
 module CellListFunctions
 
     using LinearAlgebra
+    using Dictionaries
 
     const Intx2 = Tuple{Int64, Int64}
     const Intx3 = Tuple{Int64, Int64, Int64}
@@ -20,12 +21,12 @@ module CellListFunctions
         pairsList = Intx2[] # Array of tuples storing neighbour pairs
         boundaryList = Intx3[]
 
-        # Allocate all particles in matrix pos to grid points
-        cellLists = gridAllocate(pos,nParticles,s)
+        # Allocate all particles in matrix r to grid points
+        cellLists = gridAllocate(r,nParticles,s)
 
         for key in keys(cellLists)
-            sameCellPairs!(cellLists[key], pairsList, pos, s)
-            loopNeighbour!(key, neighbourCells, cellLists, pairsList, pos, s)
+            sameCellPairs!(cellLists[key], pairsList, r, s)
+            loopNeighbour!(key, neighbourCells, cellLists, pairsList, r, s)
 
             for jj=1:3
         		if key[jj]==1
@@ -49,12 +50,12 @@ module CellListFunctions
     # Allocate all particles in matrix r to grid points. Return Dictionary cellLists mapping (x,y,z) indices to list of particles.
     @inline @views function gridAllocate(r, N, interactionThresh)
 
-        cellLists = Dict{Intx3,Vector{Int64}}()
+        cellLists = Dictionary{Intx3,Vector{Int64}}()
 
         for i = 1:N
             indexTuple = (ceil.(Int64,r[i]./interactionThresh)...,)
             if indexTuple ∉ keys(cellLists)
-                cellLists[indexTuple] = [i]
+                insert!(cellLists,indexTuple,[i])
             else
                 push!(cellLists[indexTuple],i)
             end
@@ -105,7 +106,7 @@ module CellListFunctions
         return pairsList
     end
 
-    # Function to loop over all particles in two given grid points and then call @views function  to test whether each particle pair is in interaction range
+    # Function to loop over all particles in two given grid points and then call function  to test whether each particle pair is in interaction range
     @inline @views function findPair!(cellList1, cellList2, pairsList, r, interactionThresh)
         for P1 in cellList1
             for P2 in cellList2
