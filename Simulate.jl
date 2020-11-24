@@ -14,7 +14,6 @@ using LinearAlgebra
 using Random
 using StaticArrays
 using Base.Threads
-using TimerOutputs
 
 # Import local program modules
 using InternalForces
@@ -31,8 +30,6 @@ using Visualise
 
 # Define function for bringing together modules to run simulation
 @inline @views function simulate(nTrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tMax::Float64,outputFlag::Int64,renderFlag::Int64)
-
-    to = TimerOutput()
 
     # Thermodynamic parameters
     μ              = 1.0                                # Fluid viscosity
@@ -99,25 +96,25 @@ using Visualise
     while t<tMax
 
         # Create list of particle interaction pairs based on cell lists algorithm
-        @timeit to "pairsList" pairsList,boundaryList = find_pairs(nParticles,pos,intrctnThrshld,nGrid,neighbourCells)
+        pairsList,boundaryList = find_pairs(nParticles,pos,intrctnThrshld,nGrid,neighbourCells)
 
         # Calculate tension and bending forces within each trimer
-        @timeit to "internalForces" internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
+        internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        @timeit to "interTrimerForces" interTrimerForces!(pairsList,pos,F,nDomains,ϵLJ,σ,AA,WCAthreshSq,intrctnThrshld)
+        interTrimerForces!(pairsList,pos,F,nDomains,ϵLJ,σ,AA,WCAthreshSq,intrctnThrshld)
 
         # Calculate forces on particles from system boundary
-        @timeit to "boundaryForces" boundaryForces!(boundaryList,pos,F,ϵLJ,nGrid,boxSize,dxMatrix,rₘ)
+        boundaryForces!(boundaryList,pos,F,ϵLJ,nGrid,boxSize,dxMatrix,rₘ)
 
         # Find stochastic term (Wiener process) for all monomers
-        @timeit to "calculateNoise" calculateNoise!(W,nParticles,threadRNG)
+        calculateNoise!(W,nParticles,threadRNG)
 
         # Adapt timestep to maximum force value
-        @timeit to "Δt = adaptTimestep" Δt = adaptTimestep!(F,W,nParticles,σ,D,kT)
+        Δt = adaptTimestep!(F,W,nParticles,σ,D,kT)
 
         # Integrate system with forward euler
-        @timeit to "t = updateSystem" t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
+        t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
         if (t%outputInterval)<Δt && outputFlag == 1
             outputData(pos,outfile,t,tMax,nTrimers,nDomains,σ)
@@ -129,8 +126,6 @@ using Visualise
         close(outfile)
         renderFlag == 1 ? visualise("output/"*foldername,nParticles,σ) : nothing
     end
-
-    display(to)
 
 end
 

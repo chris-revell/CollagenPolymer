@@ -12,14 +12,14 @@ using Simulate
 
 
 # Define run parameters
-nTrimers       = 4        # Number of collagen trimers
+nTrimers       = 8        # Number of collagen trimers
 L              = 0.5      # Length of one trimer
-σ              = 0.005     # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
-ϵLJ_in         = 100.0     # External Lennard-Jones energy
-k_in           = 10000.0     # Internal spring stiffness for Fraenkel spring forces between adjacent particles within a trimer
-Ebend_in       = 0.0     # Internal bending modulus of trimer
+σ              = 0.005    # Diameter of trimer = Diameter of particle within trimer/External LJ length scale (separation at which V=0) = 2*particle radius
+ϵLJ_in         = 100.0    # External Lennard-Jones energy
+k_in           = 10000.0  # Internal spring stiffness for Fraenkel spring forces between adjacent particles within a trimer
+Ebend_in       = 0.0      # Internal bending modulus of trimer
 boxSize        = 1.0      # Dimensions of cube in which particles are initialised
-tMax           = 0.001   # Total simulation time
+tMax           = 0.1      # Total simulation time
 outputFlag     = 1        # Controls whether or not data is printed to file
 renderFlag     = 1        # Controls whether or not system is visualised with povRay automatically
 
