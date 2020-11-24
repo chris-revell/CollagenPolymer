@@ -35,7 +35,7 @@ using Distributions
         end
         # Once position and orientation is found, initialise all particles within trimer
         for jj=1:nDomains
-            pos[ii*nDomains+jj] = initialx .+ (jj-1)*domainLength.*dx
+            pos[ii*nDomains+jj,:] .= initialx .+ (jj-1)*domainLength.*dx
         end
     end
     return nothing

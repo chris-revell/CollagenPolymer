@@ -19,7 +19,7 @@ using Base.Threads
         if floor(Int8,(ii-1)/nDomains)==floor(Int8,(jj-1)/nDomains) && abs(ii-jj)<=1
             # Skip adjacent particles in same trimer
         else
-            dx[:,threadid()] .= pos[jj] .- pos[ii]
+            dx[:,threadid()] .= pos[jj,:] .- pos[ii,:]
             dxmag_sq = dot(dx,dx)
         	if (ii+3)%nDomains == (jj-1)%nDomains && floor(Int8,(ii-1)/nDomains)!=floor(Int8,(jj-1)/nDomains)
             	# Apply adhesive van der waals force in stepped fashion between trimers

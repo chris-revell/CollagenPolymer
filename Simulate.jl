@@ -14,6 +14,7 @@ using LinearAlgebra
 using Random
 using StaticArrays
 using Base.Threads
+using TimerOutputs
 
 # Import local program modules
 using InternalForces
@@ -30,6 +31,8 @@ using Visualise
 
 # Define function for bringing together modules to run simulation
 @inline @views function simulate(nTrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tMax::Float64,outputFlag::Int64,renderFlag::Int64)
+
+    to = TimerOutput()
 
     # Thermodynamic parameters
     μ              = 1.0                                # Fluid viscosity
@@ -52,10 +55,10 @@ using Visualise
     nGrid          = ceil(Int64,boxSize/intrctnThrshld) # Dimensions of cellLists array
 
     # Data arrays
-    pos            = SizedVector{nParticles}(fill(SVector{3}(zeros(Float64,3)),nParticles))             # xyz positions of all particles
+    pos            = SizedArray{Tuple{nParticles,3}}(zeros(Float64,nParticles,3))             # xyz positions of all particles
     F              = SizedArray{Tuple{nParticles,3,nthreads()}}(zeros(Float64,nParticles,3,nthreads())) # xyz dimensions of all forces applied to particles
     Fmags          = SizedVector{nParticles}(zeros(Float64,nParticles))                                                          # Vector of force magnitudes for all particules
-    W              = SizedVector{nParticles}(fill(SVector{3}(zeros(Float64,3)),nParticles))                               # xyz values of stochastic Wiener process for all particles
+    W              = SizedArray{Tuple{nParticles,3}}(zeros(Float64,nParticles,3))                               # xyz values of stochastic Wiener process for all particles
     pairsList      = Tuple{Int64, Int64}[]                                                               # Array storing tuple of particle interaction pairs eg pairsList[2]=(1,5) => 2nd element of array shows that particles 1 and 5 are in interaction range
     boundaryList   = Tuple{Int64,Int64,Int64}[]                                                          # Array storing list of particles in boundary cells, with 2nd and 3rd components of tuples storing which part of boundary cell is at
     dxMatrix       = SMatrix{3,3}(Matrix(1I, 3, 3))                   # Identity matrix for later calculations
@@ -96,25 +99,25 @@ using Visualise
     while t<tMax
 
         # Create list of particle interaction pairs based on cell lists algorithm
-        pairsList,boundaryList = find_pairs(nParticles,pos,intrctnThrshld,nGrid,neighbourCells)
+        @timeit to "pairsList" pairsList,boundaryList = find_pairs(nParticles,pos,intrctnThrshld,nGrid,neighbourCells)
 
         # Calculate tension and bending forces within each trimer
-        internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
+        @timeit to "internalForces" internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
 
         # Calculate van der Waals/electrostatic interactions between nearby trimer domains
-        interTrimerForces!(pairsList,pos,F,nDomains,ϵLJ,σ,AA,WCAthreshSq,intrctnThrshld)
+        @timeit to "interTrimerForces" interTrimerForces!(pairsList,pos,F,nDomains,ϵLJ,σ,AA,WCAthreshSq,intrctnThrshld)
 
         # Calculate forces on particles from system boundary
-        boundaryForces!(boundaryList,pos,F,ϵLJ,nGrid,boxSize,dxMatrix,rₘ)
+        @timeit to "boundaryForces" boundaryForces!(boundaryList,pos,F,ϵLJ,nGrid,boxSize,dxMatrix,rₘ)
 
         # Find stochastic term (Wiener process) for all monomers
-        calculateNoise!(W,nParticles,threadRNG)
+        @timeit to "calculateNoise" calculateNoise!(W,nParticles,threadRNG)
 
         # Adapt timestep to maximum force value
-        Δt = adaptTimestep!(F,Fmags,W,nParticles,σ,D,kT)
+        @timeit to "Δt = adaptTimestep" Δt = adaptTimestep!(F,Fmags,W,nParticles,σ,D,kT)
 
         # Integrate system with forward euler
-        t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
+        @timeit to "t = updateSystem" t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
         if (t%outputInterval)<Δt && outputFlag == 1
             outputData(pos,outfile,t,tMax,nTrimers,nDomains,σ)
@@ -126,6 +129,8 @@ using Visualise
         close(outfile)
         renderFlag == 1 ? visualise("output/"*foldername,nParticles,σ) : nothing
     end
+
+    display(to)
 
 end
 

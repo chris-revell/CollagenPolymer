@@ -14,10 +14,8 @@ using Base.Threads
 
 @inline @views function updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
-    @threads for i=1:nParticles
-        pos[i] = pos[i] .+ SVector{3}(F[i,:,1].*(Δt*D/kT) .+ W[i].*sqrt(2.0*D*Δt))
-    end
-    F .= 0
+    pos .+= F[:,:,1].*(Δt*D/kT) .+ W.*sqrt(2.0*D*Δt)
+    fill!(F,0.0)
 
     return t += Δt
 

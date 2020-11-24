@@ -18,9 +18,7 @@ using Base.Threads
 
     # Loop over all trimers
     @threads for ii=1:N
-
-        W[ii] = SVector{3}(rand(threadRNG[threadid()],Normal(0.0,1.0)).* normalize!(rand(threadRNG[threadid()],Uniform(-1.0,1.0),3)))
-
+        W[ii,:] .= rand(threadRNG[threadid()],Normal(0.0,1.0)).* normalize!(rand(threadRNG[threadid()],Uniform(-1.0,1.0),3))
     end
 
     return nothing
