@@ -26,6 +26,7 @@ using Initialise
 using CreateRunDirectory
 using AdaptTimestep
 using CellListFunctions
+using Visualise
 
 # Define function for bringing together modules to run simulation
 @inline @views function simulate(nTrimers::Int64,L::Float64,σ::Float64,ϵLJ_in::Float64,k_in::Float64,Ebend_in::Float64,boxSize::Float64,tMax::Float64,outputFlag::Int64,renderFlag::Int64)
@@ -123,7 +124,7 @@ using CellListFunctions
 
     if outputFlag == 1
         close(outfile)
-        renderFlag == 1 ? run(`python3 visualise.py output/$foldername`) : nothing
+        renderFlag == 1 ? visualise("output/"*foldername,nParticles,σ) : nothing
     end
 
 end
