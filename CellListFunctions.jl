@@ -53,7 +53,7 @@ module CellListFunctions
         cellLists = Dictionary{Intx3,Vector{Int64}}()
 
         for i = 1:N
-            indexTuple = (ceil.(Int64,r[i]./interactionThresh)...,)
+            indexTuple = (ceil.(Int64,r[i,:]./interactionThresh)...,)
             if indexTuple ∉ keys(cellLists)
                 insert!(cellLists,indexTuple,[i])
             else
@@ -118,7 +118,7 @@ module CellListFunctions
 
     # Test whether two points P1 and P2 are within separation limit interactionThresh; if so, add tuple (P1,P2) to vector of pairs pairsList
     @inline @views function addOrNot!(P1, P2, r, interactionThresh, pairsList)
-        dx = r[P1].-r[P2]
+        dx = r[P1,:].-r[P2,:]
         distSq = dx⋅dx
         if distSq <= interactionThresh^2
             push!(pairsList, (P1,P2)) # Add this pair to array of neighbour pairs if within range

@@ -19,18 +19,18 @@ using Base.Threads
         if floor(Int8,(ii-1)/nDomains)==floor(Int8,(jj-1)/nDomains) && abs(ii-jj)<=1
             # Skip adjacent particles in same trimer
         else
-            dx[:,threadid()] .= pos[jj] .- pos[ii]
+            dx[threadid(),:] .= pos[jj,:] .- pos[ii,:]
             dxmag_sq = dot(dx,dx)
         	if (ii+3)%nDomains == (jj-1)%nDomains && floor(Int8,(ii-1)/nDomains)!=floor(Int8,(jj-1)/nDomains)
             	# Apply adhesive van der waals force in stepped fashion between trimers
                 lennardJones!(dx,ϵ,σ)
-                F[ii,:,threadid()] .+= dx[:,threadid()]
-                F[jj,:,threadid()] .-= dx[:,threadid()]
+                F[ii,:,threadid()] .+= dx[threadid(),:]
+                F[jj,:,threadid()] .-= dx[threadid(),:]
             elseif dxmag_sq < WCAthreshSq
                 # For all other particles, apply WCA potential (truncated repulsive Lennard-Jones)
                 lennardJones!(dx,ϵ,σ)
-                F[ii,:,threadid()] .+= dx[:,threadid()]
-                F[jj,:,threadid()] .-= dx[:,threadid()]
+                F[ii,:,threadid()] .+= dx[threadid(),:]
+                F[jj,:,threadid()] .-= dx[threadid(),:]
             else
                 # Skip any pairs within interaction range, beyond WCA range, and without specified adhesive rule
             end
