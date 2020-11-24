@@ -11,7 +11,7 @@ module AdaptTimestep
 using LinearAlgebra
 using Base.Threads
 
-@inline @views function adaptTimestep!(F,Fmags,ξ,nParticles,σ,D,kT)
+@inline @views function adaptTimestep!(F,ξ,nParticles,σ,D,kT)
 
     F[:,:,1] = sum(F,dims=3)
 

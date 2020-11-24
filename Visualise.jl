@@ -18,11 +18,11 @@ using Printf
 
 
 function visualise(foldername,nParticles,σ)
-    nImages = 100
     data = readdlm(foldername*"/output.txt",',',Float64)
+    nImages = floor(Int64,size(data)[1]/nParticles)
     r = fill(Point3(0.0,0.0,0.0),nParticles)
     set_theme!(show_axis = false, scale_plot = false, resolution = (800, 800))
-    for i in 0:nImages
+    for i in 0:nImages-1
         scene = Scene()
         meshscatter!(data[i*nParticles+1:(i+1)*nParticles,:],markersize=σ,color=:green)
         #r .= Point3.(eachslice(data[i*nParticles+1:(i+1)*nParticles,:],dims=1))

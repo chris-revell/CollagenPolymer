@@ -10,6 +10,7 @@ module Initialise
 
 using Random
 using Distributions
+using LinearAlgebra
 
 @inline @views function initialise!(pos,nTrimers,nDomains,domainLength,boxSize)
 
@@ -24,9 +25,8 @@ using Distributions
         notFound = true
         # Loop to find random trimer position and orientation such that it will fit within system box
         while notFound
-            initialx     .= rand(Uniform(-boxSize/2.0,boxSize/2.0),3)
-            initialAngle .= rand(Uniform(0.0,π),2) .* [2.0,1.0]
-            dx .= [cos(initialAngle[1])*sin(initialAngle[2]), sin(initialAngle[1])*sin(initialAngle[2]), cos(initialAngle[2])]
+            dx .= rand(Float64,3).-0.5
+            normalize!(dx)
             if false in (-boxSize/2.0 .< (initialx .+ dx.*nDomains*domainLength) .< boxSize/2.0)
                 # Repeat
             else

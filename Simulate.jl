@@ -57,7 +57,7 @@ using Visualise
     # Data arrays
     pos            = SizedArray{Tuple{nParticles,3}}(zeros(Float64,nParticles,3))             # xyz positions of all particles
     F              = SizedArray{Tuple{nParticles,3,nthreads()}}(zeros(Float64,nParticles,3,nthreads())) # xyz dimensions of all forces applied to particles
-    Fmags          = SizedVector{nParticles}(zeros(Float64,nParticles))                                                          # Vector of force magnitudes for all particules
+    #Fmags          = SizedVector{nParticles}(zeros(Float64,nParticles))                                                          # Vector of force magnitudes for all particules
     W              = SizedArray{Tuple{nParticles,3}}(zeros(Float64,nParticles,3))                               # xyz values of stochastic Wiener process for all particles
     pairsList      = Tuple{Int64, Int64}[]                                                               # Array storing tuple of particle interaction pairs eg pairsList[2]=(1,5) => 2nd element of array shows that particles 1 and 5 are in interaction range
     boundaryList   = Tuple{Int64,Int64,Int64}[]                                                          # Array storing list of particles in boundary cells, with 2nd and 3rd components of tuples storing which part of boundary cell is at
@@ -69,15 +69,15 @@ using Visualise
     Δt = 0.0
 
     # Allocate variables to reuse in calculations and prevent memory reallocations
-    AA = zeros(Float64,3,nthreads())
-    AA_bar = zeros(Float64,3,nthreads())
-    BB = zeros(Float64,3,nthreads())
-    BB_bar = zeros(Float64,3,nthreads())
-    CC = zeros(Float64,3,nthreads())
-    DD = zeros(Float64,3,nthreads())
-    DD_bar = zeros(Float64,3,nthreads())
-    EE = zeros(Float64,3,nthreads())
-    EE_bar = zeros(Float64,3,nthreads())
+    AA     = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    AA_bar = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    BB     = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    BB_bar = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    CC     = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    DD     = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    DD_bar = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    EE     = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
+    EE_bar = SizedArray{Tuple{nthreads(),3}}(zeros(Float64,nthreads(),3))
 
     # Create random number generators for each thread
     threadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
@@ -114,7 +114,7 @@ using Visualise
         @timeit to "calculateNoise" calculateNoise!(W,nParticles,threadRNG)
 
         # Adapt timestep to maximum force value
-        @timeit to "Δt = adaptTimestep" Δt = adaptTimestep!(F,Fmags,W,nParticles,σ,D,kT)
+        @timeit to "Δt = adaptTimestep" Δt = adaptTimestep!(F,W,nParticles,σ,D,kT)
 
         # Integrate system with forward euler
         @timeit to "t = updateSystem" t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)

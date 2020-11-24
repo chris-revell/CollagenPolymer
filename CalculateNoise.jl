@@ -14,11 +14,11 @@ using LinearAlgebra
 using StaticArrays
 using Base.Threads
 
-@inline @views function calculateNoise!(W,N,threadRNG)
+@inline @views function calculateNoise!(W,nParticles,threadRNG)
 
     # Loop over all trimers
-    @threads for ii=1:N
-        W[ii,:] .= rand(threadRNG[threadid()],Normal(0.0,1.0)).* normalize!(rand(threadRNG[threadid()],Uniform(-1.0,1.0),3))
+    @threads for ii=1:nParticles
+        W[ii,:] .= rand(threadRNG[threadid()],Normal(0.0,1.0)).*normalize!(rand(threadRNG[threadid()],Uniform(-1.0,1.0),3))
     end
 
     return nothing
