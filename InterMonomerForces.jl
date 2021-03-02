@@ -1,28 +1,28 @@
 #
-#  InterTrimerForces.jl
+#  InterMonomerForces.jl
 #  collagen-brownian-polymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
 #
 
-module InterTrimerForces
+module InterMonomerForces
 
 using LinearAlgebra
 using LennardJones
 using StaticArrays
 using Base.Threads
 
-@inline @views function interTrimerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
+@inline @views function interMonomerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
 
     @threads for (ii,jj) in pairsList
         if floor(Int8,(ii-1)/nDomains)==floor(Int8,(jj-1)/nDomains) && abs(ii-jj)<=1
-            # Skip adjacent particles in same trimer
+            # Skip adjacent particles in same monomer
         else
             dx[threadid(),:] .= pos[jj,:] .- pos[ii,:]
             dxmag_sq = dot(dx,dx)
         	if (ii+3)%nDomains == (jj-1)%nDomains && floor(Int8,(ii-1)/nDomains)!=floor(Int8,(jj-1)/nDomains)
-            	# Apply adhesive van der waals force in stepped fashion between trimers
+            	# Apply adhesive van der waals force in stepped fashion between monomers
                 lennardJones!(dx,ϵ,σ)
                 F[ii,:,threadid()] .+= dx[threadid(),:]
                 F[jj,:,threadid()] .-= dx[threadid(),:]
@@ -38,6 +38,6 @@ using Base.Threads
     end
 end
 
-export interTrimerForces!
+export interMonomerForces!
 
 end

@@ -20,7 +20,7 @@ with open("{}/conditions.txt".format(argv[1])) as f:
        (key, val) = line.split()
        conditions[key] = float(val)
 
-nImages = int(data.shape[0]/(float(conditions["nTrimers"])*float(conditions["nDomains"])))
+nImages = int(data.shape[0]/(float(conditions["nMonomers"])*float(conditions["nDomains"])))
 
 for i in range(nImages):
     #os.system("clear")
@@ -44,8 +44,8 @@ for i in range(nImages):
 
     outfile.write("box{{<{},{},{}>,<{},{},{}> texture {{pigment{{color White filter 0.8}} finish {{phong 1.0}} }} }}".format(float(conditions["boxSize"])/2.0,float(conditions["boxSize"])/2.0,float(conditions["boxSize"])/2.0,-float(conditions["boxSize"])/2.0,-float(conditions["boxSize"])/2.0,-float(conditions["boxSize"])/2.0))
 
-    subdata = data[i*int(conditions["nTrimers"])*int(conditions["nDomains"]):(i+1)*int(conditions["nTrimers"])*int(conditions["nDomains"]),:]
-    for j in range(int(conditions["nTrimers"])):
+    subdata = data[i*int(conditions["nMonomers"])*int(conditions["nDomains"]):(i+1)*int(conditions["nMonomers"])*int(conditions["nDomains"]),:]
+    for j in range(int(conditions["nMonomers"])):
         for k in range(5):
             outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Blue}}}}}}\n".format(subdata[j*int(conditions["nDomains"])+k,0],subdata[j*int(conditions["nDomains"])+k,1],subdata[j*int(conditions["nDomains"])+k,2],conditions["σ"]/2.0))
             outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Blue}}}}}}\n".format(subdata[j*int(conditions["nDomains"])+k,0],subdata[j*int(conditions["nDomains"])+k,1],subdata[j*int(conditions["nDomains"])+k,2],subdata[j*int(conditions["nDomains"])+k+1,0],subdata[j*int(conditions["nDomains"])+k+1,1],subdata[j*int(conditions["nDomains"])+k+1,2],conditions["σ"]/2.0))
@@ -56,7 +56,7 @@ for i in range(nImages):
             outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Red}}}}}}\n".format(subdata[j*int(conditions["nDomains"])+k,0],subdata[j*int(conditions["nDomains"])+k,1],subdata[j*int(conditions["nDomains"])+k,2],conditions["σ"]/2.0))
             outfile.write("cylinder{{<{},{},{}>,<{},{},{}>,{} texture{{pigment{{color Red}}}}}}\n".format(subdata[j*int(conditions["nDomains"])+k,0],subdata[j*int(conditions["nDomains"])+k,1],subdata[j*int(conditions["nDomains"])+k,2],subdata[j*int(conditions["nDomains"])+k+1,0],subdata[j*int(conditions["nDomains"])+k+1,1],subdata[j*int(conditions["nDomains"])+k+1,2],conditions["σ"]/2.0))
         outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Red}}}}}}\n".format(subdata[int(conditions["nDomains"])*(j+1)-1,0],subdata[int(conditions["nDomains"])*(j+1)-1,1],subdata[int(conditions["nDomains"])*(j+1)-1,2],conditions["σ"]/2.0))
-    #for j in range(int(conditions["nTrimers"])*int(conditions["nDomains"])):
+    #for j in range(int(conditions["nMonomers"])*int(conditions["nDomains"])):
     #    outfile.write("sphere{{<{},{},{}>,{} texture{{pigment{{color Green}}}}}}\n".format(subdata[j,0],subdata[j,1],subdata[j,2],conditions["σ"]/2.0))
     outfile.close()
     os.system("povray {}/povrayTmp{:03d}.pov > /dev/null 2>&1".format(argv[1],i))

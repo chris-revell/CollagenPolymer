@@ -11,14 +11,14 @@ module InternalForces
 using LinearAlgebra
 using Base.Threads
 
-function internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
+function internalForces!(pos,F,nMonomers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
 
 	# Loop over all particles
 	@threads for jj=1:nParticles
 
-		# Tension forces between trimer domains
+		# Tension forces between monomer domains
 		if jj%nDomains == 0
-			# Skip at the end of each trimer
+			# Skip at the end of each monomer
 		else
 			# Calculate tension forces between adjacent particles with Hookean spring potential
 			AA[threadid(),:] .= pos[jj+1,:] .- pos[jj,:]
@@ -31,7 +31,7 @@ function internalForces!(pos,F,nTrimers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_b
 
 			# Bending forces
 			if (jj+1)%nDomains == 0
-				# Skip at the end of each trimer
+				# Skip at the end of each monomer
 			else
 				# Vector from second particle to third
 				BB[threadid(),:] = pos[jj+2,:] .- pos[jj+1,:]

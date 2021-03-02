@@ -10,18 +10,19 @@ module CreateRunDirectory
 
 using Dates
 
-function createRunDirectory(nTrimers,L,nDomains,μ,kT,ϵLJ,σ,k,rₑ,Ebend,D,tMax,outputInterval,nGrid,boxSize)
+function createRunDirectory(nMonomers,L,nDomains,μ,kT,ϵLJ,σ,k,rₑ,Ebend,D,tMax,outputInterval,nGrid,boxSize,intrctnThrshld)
 
     # Create directory for run data labelled with current time.
     foldername = Dates.format(Dates.now(),"yyyy-mm-dd-HH-MM-SS")
     mkdir("output/$(foldername)")
     # Store system parameters.
     open("output/$(foldername)/conditions.txt","w") do conditionsfile
-        println(conditionsfile,"nTrimers       $nTrimers      ")
+        println(conditionsfile,"nMonomers      $nMonomers      ")
         println(conditionsfile,"L              $L              ")
         println(conditionsfile,"σ              $σ              ")
         println(conditionsfile,"nDomains       $nDomains       ")
-        println(conditionsfile,"nGrid             $nGrid             ")
+        println(conditionsfile,"nGrid          $nGrid          ")
+        println(conditionsfile,"intrctnThrshld $intrctnThrshld ")
         println(conditionsfile,"μ              $μ              ")
         println(conditionsfile,"kT             $kT             ")
         println(conditionsfile,"ϵLJ            $ϵLJ            ")
