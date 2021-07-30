@@ -10,12 +10,11 @@ module UpdateSystem
 
 using LinearAlgebra
 using StaticArrays
-using Base.Threads
 
 @inline @views function updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
-    pos .+= F[:,:,1].*(Δt*D/kT) .+ W.*sqrt(2.0*D*Δt)
-    fill!(F,0.0)
+    pos .+= F[:,1]*(Δt*D/kT) .+ W.*sqrt(2.0*D*Δt)
+    fill!(F,@SVector zeros(3))
 
     return t += Δt
 

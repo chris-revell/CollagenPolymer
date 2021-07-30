@@ -9,21 +9,22 @@
 module AdaptTimestep
 
 using LinearAlgebra
-using Base.Threads
+using StaticArrays
 
-@inline @views function adaptTimestep!(F,ξ,nParticles,σ,D,kT)
+@inline @views function adaptTimestep(F,W,magsF,magsW,σ)
 
-    F[:,:,1] = sum(F,dims=3)
+    magsF .= norm.(F)
+    maxF = maximum(magsF)
 
-    Fmax_sq = maximum(sum(F[:,:,1].*F[:,:,1],dims=2))
-    ξmax_sq = maximum(sum(ξ.*ξ,dims=2))
+    magsW .= norm.(W)
+    maxW = maximum(magsW)
 
-    Δt = min(σ^2/(4.0*ξmax_sq),σ/(2.0*sqrt(Fmax_sq)))
+    Δt = min(σ^2/(4.0*maxW^2),σ/(2.0*maxF))
 
     return Δt
 
 end
 
-export adaptTimestep!
+export adaptTimestep
 
 end

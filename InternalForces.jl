@@ -9,64 +9,68 @@
 module InternalForces
 
 using LinearAlgebra
-using Base.Threads
+using StaticArrays
 
-function internalForces!(pos,F,nMonomers,nDomains,nParticles,k,rₑ,Ebend,AA,AA_bar,BB,BB_bar,CC,DD,DD_bar,EE,EE_bar)
+function internalForces!(pos,F,nMonomers,nDomains,nParticles,k,rₑ,Ebend,AA,BB,CC,DD,EE)
 
 	# Loop over all particles
-	@threads for jj=1:nParticles
+	for jj=1:nParticles
 
 		# Tension forces between monomer domains
 		if jj%nDomains == 0
 			# Skip at the end of each monomer
 		else
 			# Calculate tension forces between adjacent particles with Hookean spring potential
-			AA[threadid(),:] .= pos[jj+1,:] .- pos[jj,:]
-		    AA_mag = norm(AA[threadid(),:])
-			AA_bar[threadid(),:] .= AA[threadid(),:]./AA_mag
+
+			# Find vector AA between 1st and 2nd particle
+			AA = pos[jj+1] - pos[jj]
+		    AA_mag = norm(AA)
+			AA = AA/AA_mag
+			#println("AA_mag = $AA_mag")
 
 			dif = AA_mag - rₑ
-		    F[jj,:,threadid()]   .+= dif*k.*AA[threadid(),:]./AA_mag
-		    F[jj+1,:,threadid()] .-= dif*k.*AA[threadid(),:]./AA_mag
+			#println("dif = $dif")
+		    F[jj]   += dif*k*AA
+			#println("F[jj]   = $(F[jj]  )")
+		    F[jj+1] -= dif*k*AA
+			#println("F[jj+1] = $(F[jj+1])")
 
 			# Bending forces
-			if (jj+1)%nDomains == 0
-				# Skip at the end of each monomer
-			else
-				# Vector from second particle to third
-				BB[threadid(),:] = pos[jj+2,:] .- pos[jj+1,:]
-				BB_mag = sqrt(dot(BB[threadid(),:],BB[threadid(),:]))
-				BB_bar[threadid(),:] .= BB[threadid(),:]./BB_mag
-
-				if abs.(BB_bar[threadid(),:].-AA_bar[threadid(),:]) < [0.000001,0.000001,0.000001]
-					# skip if colinear
-				else
-
-					# Vector perpendicular to BB and in plane defined by AA and BB
-					CC[threadid(),:] = cross(AA[threadid(),:],BB[threadid(),:])
-
-					# Vector perpendicular to AA and in plane defined by AA and BB
-					DD[threadid(),:] = cross(AA[threadid(),:],CC[threadid(),:])
-					DD_mag = sqrt(dot(DD[threadid(),:],DD[threadid(),:]))
-					DD_bar[threadid(),:] .= DD[threadid(),:]./DD_mag
-
-					# Vector opposing the sum of CC and DD
-					EE[threadid(),:] = cross(BB[threadid(),:],CC[threadid(),:])
-					EE_mag = sqrt(dot(EE[threadid(),:],EE[threadid(),:]))
-					EE_bar[threadid(),:] .= EE[threadid(),:]./EE_mag
-
-					θ=acos(dot(-AA_bar[threadid(),:],BB_bar[threadid(),:]))
-					Fmag = Ebend*(π-θ)
-
-					F[jj,:,threadid()]   .+= Fmag.*DD_bar[threadid(),:]
-					#Fbend[jj,:]   .+= Fmag.*DD_bar
-					F[jj+1,:,threadid()] .-= Fmag.*(DD_bar[threadid(),:].+EE_bar[threadid(),:])
-					#Fbend[jj+1,:] .-= Fmag.*(DD_bar.+EE_bar)
-					F[jj+2,:,threadid()] .+= Fmag.*EE_bar[threadid(),:]
-					#Fbend[jj+2,:] .+= Fmag.*EE_bar
-				end
-			end
+			# if (jj+1)%nDomains == 0
+			# 	# Skip at the end of each monomer
+			# else
+			# 	# Vector BB between 2nd and 3rd particle
+			# 	BB = pos[jj+2] - pos[jj+1]
+			# 	BB_mag = norm(BB)
+			# 	BB = BB/BB_mag
+			#
+			# 	if dot(BB,AA) > 0.9999999999
+			# 		# Skip if colinear, ie cosθ=BB⋅AA≈1
+			# 	else
+			#
+			# 		# Cross produce of AA and BB gives vector CC, perpendicular to plane defined by AA and BB
+			# 		CC = AA×BB
+			#
+			# 		# Find vector DD perpendicular to AA and lying in plane of AA and BB with cross product of AA and CC
+			# 		DD = AA×CC
+			# 		DD_mag = norm(DD)
+			# 		DD = DD/DD_mag
+			#
+			# 		# Vector opposing the sum of CC and DD
+			# 		EE = BB×CC
+			# 		EE_mag = norm(EE)
+			# 		EE = EE/EE_mag
+			#
+			# 		θ    = acos(-AA⋅BB)
+			# 		Fmag = Ebend*θ
+			# 		F[jj]   += Fmag*DD
+			# 		F[jj+1] -= Fmag*(DD+EE)
+			# 		F[jj+2] += Fmag*EE
+			#
+			# 	end
+			# end
 		end
+
 	end
 	return nothing
 end

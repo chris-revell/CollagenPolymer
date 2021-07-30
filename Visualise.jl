@@ -11,7 +11,6 @@ module Visualise
 using DelimitedFiles
 using Makie
 using LinearAlgebra
-using AbstractPlotting
 using GeometryBasics
 using Colors
 using Printf

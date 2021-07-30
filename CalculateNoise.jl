@@ -12,15 +12,14 @@ using Random
 using Distributions
 using LinearAlgebra
 using StaticArrays
-using Base.Threads
 
-@inline @views function calculateNoise!(W,nParticles,threadRNG)
+function calculateNoise!(W,nParticles,threadRNG)
 
     # Loop over all monomers
-    @threads for ii=1:nParticles
-        W[ii,:] .= rand(threadRNG[threadid()],Uniform(-1.0,1.0),3)
-        normalize!(W[ii,:])
-        W[ii,:] .*= rand(threadRNG[threadid()],Normal(0.0,1.0))
+    for ii=1:nParticles
+        W[ii] = SVector{3}(rand(threadRNG,Uniform(-1.0,1.0),3))
+        magW = norm(W[ii])
+        W[ii] = W[ii]*rand(threadRNG,Normal(0.0,1.0))/magW
     end
 
     return nothing

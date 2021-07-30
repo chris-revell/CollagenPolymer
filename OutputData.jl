@@ -11,12 +11,10 @@ module OutputData
 using DelimitedFiles
 using LinearAlgebra
 
-@inline @views function outputData(pos,outfile,t,tMax,nMonomers,nDomains,σ)
+@inline @views function outputData(pos,outfile)#,t,tMax)#,nMonomers,nDomains,σ)
 
     writedlm(outfile,pos,", ")
     flush(outfile)
-    #run(`clear`)
-    println("Simulating: $t/$tMax")
 
     # Measure monomer lengths
     # for i=0:nMonomers-1
