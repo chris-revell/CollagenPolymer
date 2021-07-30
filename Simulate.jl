@@ -73,6 +73,7 @@ using Visualise
         outputData(pos,outfile)#,t,tMax)#,nMonomers,nDomains,σ)
     end
 
+    println("|                   |                   |                   |                   |                  |")
     #Iterate over time until max system time is reached
     while t<tMax
 
@@ -86,7 +87,7 @@ using Visualise
         interMonomerForces!(pairsList,pos,F,nDomains,ϵLJ,σ,AA,WCAthreshSq,intrctnThrshld)
 
         # Calculate forces on particles from system boundary
-        #boundaryForces!(boundaryList,pos,F,ϵLJ,nGrid,boxSize,dxMatrix,rₘ)
+        boundaryForces!(boundaryList,pos,F,ϵLJ,nGrid,boxSize,dxMatrix,rₘ)
 
         # Find stochastic term (Wiener process) for all monomers
         calculateNoise!(W,nParticles,threadRNG)
@@ -97,12 +98,13 @@ using Visualise
         # Integrate system with forward euler
         t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
-        if (t%outputInterval)<Δt
-            println("Simulating: $t/$tMax")
-            outputFlag == 1 ? outputData(pos,outfile) : nothing            
+        if (t%outputInterval)<Δt            
+            print(">")
+            outputFlag == 1 ? outputData(pos,outfile) : nothing
         end
 
     end
+    print("\n")
 
     if outputFlag == 1
         close(outfile)
