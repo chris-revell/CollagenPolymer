@@ -15,7 +15,7 @@ using LinearAlgebra
 # Import local program modules
 
 
-@inline @views function outputData(pos,outfile)#,t,tMax)#,nMonomers,nDomains,σ)
+function outputData(pos,outfile)#,t,tMax)#,nMonomers,nDomains,σ)
 
     writedlm(outfile,pos,", ")
     flush(outfile)

@@ -28,7 +28,7 @@ using CellListFunctions
 using Visualise
 
 # Define function for bringing together modules to run simulation
-@inline @views function collagenPolymer(nMonomers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tMax,outputFlag,renderFlag)
+@views function collagenPolymer(nMonomers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tMax,outputFlag,renderFlag)
 
     # Run parameters
     # nMonomers      (eg. 2    )   Number of collagen monomers
@@ -108,7 +108,7 @@ using Visualise
 
     if outputFlag == 1
         close(outfile)
-        renderFlag == 1 ? run(`python3 visualise.py output/$foldername`) : nothing
+        renderFlag == 1 ? run(`python3 src/visualise.py output/$foldername`) : nothing
     end
 
 end

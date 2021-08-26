@@ -15,7 +15,7 @@ using StaticArrays
 # Import local program modules
 using LennardJones
 
-@inline @views function interMonomerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
+function interMonomerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
 
     for (ii,jj) in pairsList
         if floor(Int8,(ii-1)/nDomains)==floor(Int8,(jj-1)/nDomains) && abs(ii-jj)<=1

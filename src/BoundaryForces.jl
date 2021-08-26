@@ -15,7 +15,7 @@ using StaticArrays
 # Import local program modules
 
 
-@inline @views function boundaryForces!(boundaryList,pos,F,ϵ,nGrid,boxSize,dxMatrix,rₘ)
+@views function boundaryForces!(boundaryList,pos,F,ϵ,nGrid,boxSize,dxMatrix,rₘ)
 
 	# Boundary forces
 	for (particle,dimension,edge) in boundaryList

@@ -15,7 +15,7 @@ using StaticArrays
 # Import local program modules
 
 
-@inline @views function adaptTimestep(F,W,magsF,magsW,σ)
+function adaptTimestep(F,W,magsF,magsW,σ)
 
     magsF .= norm.(F)
     maxF = maximum(magsF)

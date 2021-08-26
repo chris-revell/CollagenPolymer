@@ -15,7 +15,7 @@ using StaticArrays
 # Import local program modules
 
 
-@inline @views function updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
+@views function updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
     pos .+= F[:,1]*(Δt*D/kT) .+ W.*sqrt(2.0*D*Δt)
     fill!(F,@SVector zeros(3))
