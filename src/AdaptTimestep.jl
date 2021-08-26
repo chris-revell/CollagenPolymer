@@ -1,6 +1,6 @@
 #
 #  AdaptTimestep.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 06/07/2020.
 #
@@ -8,8 +8,12 @@
 
 module AdaptTimestep
 
+# Import Julia packages
 using LinearAlgebra
 using StaticArrays
+
+# Import local program modules
+
 
 @inline @views function adaptTimestep(F,W,magsF,magsW,σ)
 

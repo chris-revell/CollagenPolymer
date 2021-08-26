@@ -1,6 +1,6 @@
 #
 #  InterMonomerForces.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
@@ -8,9 +8,12 @@
 
 module InterMonomerForces
 
+# Import Julia packages
 using LinearAlgebra
-using LennardJones
 using StaticArrays
+
+# Import local program modules
+using LennardJones
 
 @inline @views function interMonomerForces!(pairsList,pos,F,nDomains,ϵ,σ,dx,WCAthreshSq,intrctnThrshld)
 

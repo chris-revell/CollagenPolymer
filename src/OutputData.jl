@@ -1,6 +1,6 @@
 #
 #  OutputData.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
@@ -8,8 +8,12 @@
 
 module OutputData
 
+# Import Julia packages
 using DelimitedFiles
 using LinearAlgebra
+
+# Import local program modules
+
 
 @inline @views function outputData(pos,outfile)#,t,tMax)#,nMonomers,nDomains,σ)
 

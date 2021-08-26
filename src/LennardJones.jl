@@ -1,6 +1,6 @@
 #
 #  LennardJones.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
@@ -8,7 +8,11 @@
 
 module LennardJones
 
+# Import Julia packages
 using LinearAlgebra
+
+# Import local program modules
+
 
 @inline @views function lennardJones(dxMag,ϵ,σ)
 

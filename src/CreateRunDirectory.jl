@@ -1,6 +1,6 @@
 #
 #  CreateRunDirectory.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 02/05/2020.
 #
@@ -8,7 +8,11 @@
 
 module CreateRunDirectory
 
+# Import Julia packages
 using Dates
+
+# Import local program modules
+
 
 function createRunDirectory(nMonomers,L,nDomains,μ,kT,ϵLJ,σ,k,rₑ,Ebend,D,tMax,outputInterval,nGrid,boxSize,intrctnThrshld)
 

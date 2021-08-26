@@ -1,6 +1,6 @@
 #
 #  UpdateSystem.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
@@ -8,8 +8,12 @@
 
 module UpdateSystem
 
+# Import Julia packages
 using LinearAlgebra
 using StaticArrays
+
+# Import local program modules
+
 
 @inline @views function updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 

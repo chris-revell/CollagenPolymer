@@ -1,6 +1,6 @@
 #
 #  CalculateNoise.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
@@ -8,10 +8,14 @@
 
 module CalculateNoise
 
+# Import Julia packages
 using Random
 using Distributions
 using LinearAlgebra
 using StaticArrays
+
+# Import local program modules
+
 
 function calculateNoise!(W,nParticles,threadRNG)
 

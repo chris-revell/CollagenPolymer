@@ -1,6 +1,6 @@
 #
 #  Visualise.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 22/11/2020.
 #
@@ -8,12 +8,15 @@
 
 module Visualise
 
+# Import Julia packages
 using DelimitedFiles
 using Makie
 using LinearAlgebra
 using GeometryBasics
 using Colors
 using Printf
+
+# Import local program modules
 
 
 function visualise(foldername,nParticles,σ)

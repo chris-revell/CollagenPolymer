@@ -1,6 +1,6 @@
 #
 #  Initialise.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 01/05/2020.
 #
@@ -8,10 +8,14 @@
 
 module Initialise
 
+# Import Julia packages
 using Random
 using Distributions
 using LinearAlgebra
 using StaticArrays
+
+# Import local program modules
+
 
 function initialise(nMonomers,nDomains,nParticles,domainLength,boxSize)
 

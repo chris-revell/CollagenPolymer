@@ -1,12 +1,12 @@
 #
-#  main.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer.jl
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
 #
 
-module Simulate
+module CollagenPolymer
 
 # Import Julia packages
 using Distributions
@@ -28,7 +28,7 @@ using CellListFunctions
 using Visualise
 
 # Define function for bringing together modules to run simulation
-@inline @views function simulate(nMonomers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tMax,outputFlag,renderFlag)
+@inline @views function collagenPolymer(nMonomers,L,σ,ϵLJ_in,k_in,Ebend_in,boxSize,tMax,outputFlag,renderFlag)
 
     # Run parameters
     # nMonomers      (eg. 2    )   Number of collagen monomers
@@ -98,7 +98,7 @@ using Visualise
         # Integrate system with forward euler
         t = updateSystem!(pos,F,W,t,Δt,D,kT,nParticles)
 
-        if (t%outputInterval)<Δt            
+        if (t%outputInterval)<Δt
             print(">")
             outputFlag == 1 ? outputData(pos,outfile) : nothing
         end
@@ -113,6 +113,6 @@ using Visualise
 
 end
 
-export simulate
+export collagenPolymer
 
 end

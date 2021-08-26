@@ -1,6 +1,6 @@
 #
 #  InternalForces.jl
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 04/07/2020.
 #
@@ -8,9 +8,13 @@
 
 module InternalForces
 
+# Import Julia packages
 using LinearAlgebra
 using StaticArrays
 using LoopVectorization
+
+# Import local program modules
+
 
 function internalForces!(pos,F,nMonomers,nDomains,nParticles,k,rₑ,Ebend,AA,BB,CC,DD,EE)
 

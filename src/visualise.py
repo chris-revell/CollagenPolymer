@@ -1,7 +1,7 @@
 #! /usr/local/bin/python3
 #
 #  visualise.py
-#  collagen-brownian-polymer
+#  CollagenPolymer
 #
 #  Created by Christopher Revell on 30/03/2020.
 #
